@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Tabla de usuarios del sistema (Panel Admin)
+// ============================================
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  nombre       String
+  role         Role     @default(ejecutivo_comercial)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+enum Role {
+  admin
+  ejecutivo_comercial
+  operario_bodega
+  repartidor
+}
+
+// ============================================
+// Mapeo de IDs entre sistemas
+// ============================================
+model IdMapping {
+  id             String     @id @default(uuid())
+  entityType     EntityType @map("entity_type")
+  internalId     String     @map("internal_id")
+  syncmanagerId  String?    @map("syncmanager_id")
+  shopifyId      String?    @map("shopify_id")
+  bsaleId        String?    @map("bsale_id")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  @@unique([entityType, internalId])
+  @@index([syncmanagerId])
+  @@index([shopifyId])
+  @@index([bsaleId])
+  @@map("id_mappings")
+}
+
+enum EntityType {
+  lead
+  cliente
+  producto
+  pedido
+  factura
+}
+
+// ============================================
+// Estado de procesos orquestados
+// ============================================
+model ProcessState {
+  id            String        @id @default(uuid())
+  processType   ProcessType   @map("process_type")
+  entityId      String        @map("entity_id")
+  currentStep   String        @map("current_step")
+  status        ProcessStatus @default(pending)
+  stepsLog      Json          @default("[]") @map("steps_log")
+  errorDetails  Json?         @map("error_details")
+  retryCount    Int           @default(0) @map("retry_count")
+  startedAt     DateTime      @default(now()) @map("started_at")
+  completedAt   DateTime?     @map("completed_at")
+
+  @@index([processType, status])
+  @@index([entityId])
+  @@map("process_states")
+}
+
+enum ProcessType {
+  onboarding_lead
+  pedido_completo
+  facturacion
+  despacho
+  sincronizacion_stock
+}
+
+enum ProcessStatus {
+  pending
+  in_progress
+  completed
+  failed
+  compensating
+}
+
+// ============================================
+// Reglas de negocio configurables
+// ============================================
+model BusinessRule {
+  id          String   @id @default(uuid())
+  ruleKey     String   @unique @map("rule_key")
+  ruleValue   Json     @map("rule_value")
+  description String
+  isActive    Boolean  @default(true) @map("is_active")
+  updatedBy   String?  @map("updated_by")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("business_rules")
+}
+
+// ============================================
+// Logs de auditoría
+// ============================================
+model AuditLog {
+  id              String   @id @default(uuid())
+  timestamp       DateTime @default(now())
+  action          String
+  actor           String
+  entityType      String   @map("entity_type")
+  entityId        String   @map("entity_id")
+  sourceSystem    String   @map("source_system")
+  requestPayload  Json?    @map("request_payload")
+  responseSummary Json?    @map("response_summary")
+  status          String   @default("success")
+
+  @@index([entityType, entityId])
+  @@index([timestamp])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ============================================
+// Eventos de webhooks recibidos
+// ============================================
+model WebhookEvent {
+  id          String        @id @default(uuid())
+  source      WebhookSource
+  eventType   String        @map("event_type")
+  payload     Json
+  processed   Boolean       @default(false)
+  processedAt DateTime?     @map("processed_at")
+  error       String?
+  receivedAt  DateTime      @default(now()) @map("received_at")
+
+  @@index([source, eventType])
+  @@index([processed])
+  @@map("webhook_events")
+}
+
+enum WebhookSource {
+  shopify
+  bsale
+  syncmanager
+}

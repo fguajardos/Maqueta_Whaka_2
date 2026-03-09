@@ -1,0 +1,46 @@
+# ====================================
+# Render Blueprint — WMS WhakaChile
+# ====================================
+# Deploy: conecta tu repo GitHub y Render
+# detecta este archivo automáticamente.
+# ====================================
+
+databases:
+  - name: whakachile-db
+    plan: free
+    databaseName: whakachile
+    user: whakachile
+
+services:
+  - type: web
+    name: whakachile-wms
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build && npx prisma db push --skip-generate && npx tsx prisma/seed.ts
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: whakachile-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 4h
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      # Redis no es necesario para la maqueta
+      - key: REDIS_HOST
+        value: ""
+      # APIs externas (maqueta usa datos mock)
+      - key: BSALE_ACCESS_TOKEN
+        value: mock
+      - key: SHOPIFY_ACCESS_TOKEN
+        value: mock
+      - key: SYNCMANAGER_API_KEY
+        value: mock

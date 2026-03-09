@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- Tiki Face Circle -->
+  <circle cx="40" cy="40" r="36" fill="#3B2D80"/>
+  <!-- Face details -->
+  <circle cx="30" cy="32" r="6" fill="#FFFFFF"/>
+  <circle cx="50" cy="32" r="6" fill="#FFFFFF"/>
+  <circle cx="30" cy="32" r="3" fill="#3B2D80"/>
+  <circle cx="50" cy="32" r="3" fill="#3B2D80"/>
+  <!-- Nose -->
+  <ellipse cx="40" cy="42" rx="5" ry="4" fill="#FFFFFF" opacity="0.9"/>
+  <!-- Mouth -->
+  <path d="M28 52 Q34 58 40 52 Q46 58 52 52" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Decorative spirals -->
+  <path d="M16 28 Q12 20 20 18" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M64 28 Q68 20 60 18" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Forehead mark -->
+  <path d="M32 20 L40 14 L48 20" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
