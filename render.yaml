@@ -48,17 +48,15 @@ services:
       - key: SYNCMANAGER_API_KEY
         value: mock
 
-  # ── Frontend CRM (React / Vite — sitio estático) ────
-  - type: static
+  # ── Frontend CRM (React / Vite — servido con `serve`) ──
+  # Render no soporta type:static en blueprints; se usa type:web + serve
+  - type: web
     name: whakachile-crm
+    runtime: node
+    plan: free
     rootDir: crm
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    # Redirige todas las rutas al index.html (SPA)
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    startCommand: npx serve -s dist -l $PORT
     envVars:
       - key: VITE_MAPBOX_TOKEN
         value: pk.eyJ1IjoiZmd1YWphcmRvcyIsImEiOiJjbW1waGR2azgwcXB1MnFxMHhlbGRwejZxIn0.jbxHv5KT4XYPLbx8_FjmtQ
