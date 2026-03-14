@@ -74,7 +74,9 @@ const ApiClient = (() => {
 
     return {
         getToken,
+        setToken,
         getUser,
+        setUser,
         isAuthenticated,
         login,
         logout,

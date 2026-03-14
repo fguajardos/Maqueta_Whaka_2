@@ -106,6 +106,28 @@ export const PEDIDOS = [
         folioFactura: '', rutaDespachoId: '', notaPedido: 'Preguntar por Sofía',
     },
     {
+        id: 'WHK-PED-DEMO-001', clienteId: 'CLI-001', cliente: 'Green Bowl Providencia', canalOrigen: 'whatsapp', estado: 'despachado',
+        items: [
+            { productoId: 'PRD-001', nombre: 'Acaí IPA 330ml', formato: '330ml', cantidad: 6, precioUnit: 3200, subtotal: 19200 },
+            { productoId: 'PRD-002', nombre: 'Stout Tropical 330ml', formato: '330ml', cantidad: 4, precioUnit: 3400, subtotal: 13600 },
+        ],
+        subtotal: 27563, iva: 5237, total: 32800,
+        direccionDespacho: 'Av. Providencia 1020, Local 3', comuna: 'Providencia', region: 'Región Metropolitana',
+        fechaPedido: '2026-03-10T09:00:00', fechaDespachoProgramada: '2026-03-13', condicionPago: 'credito_30',
+        folioFactura: 'F-20260313-010', rutaDespachoId: 'RUTA-DEMO-001', notaPedido: 'Pedido demo — sincronizado con WMS',
+    },
+    {
+        id: 'WHK-PED-DEMO-002', clienteId: 'CLI-002', cliente: 'Roots Organic Ñuñoa', canalOrigen: 'whatsapp', estado: 'despachado',
+        items: [
+            { productoId: 'PRD-003', nombre: 'Amber Orgánico 330ml', formato: '330ml', cantidad: 3, precioUnit: 3600, subtotal: 10800 },
+            { productoId: 'PRD-004', nombre: 'Golden Ale 330ml', formato: '330ml', cantidad: 12, precioUnit: 3200, subtotal: 38400 },
+        ],
+        subtotal: 41513, iva: 7887, total: 49400,
+        direccionDespacho: 'La Florida 5430, Local 8', comuna: 'La Florida', region: 'Región Metropolitana',
+        fechaPedido: '2026-03-10T10:30:00', fechaDespachoProgramada: '2026-03-13', condicionPago: 'credito_60',
+        folioFactura: 'F-20260313-011', rutaDespachoId: 'RUTA-DEMO-001', notaPedido: 'Pedido demo — sincronizado con WMS',
+    },
+    {
         id: 'WHK-000951', clienteId: 'CLI-003', cliente: 'Bowl & Co Las Condes', canalOrigen: 'whatsapp', estado: 'incidencia',
         items: [],
         subtotal: 0, iva: 0, total: 0,
@@ -127,10 +149,10 @@ export const LEADS = [
 
 // --- USUARIOS DEL SISTEMA ---
 export const USUARIOS = [
-    { email: 'admin@whaka.cl', nombre: 'Admin Whaka', rol: 'admin', acceso: 'Acceso total', avatar: 'AW', password: 'admin123' },
-    { email: 'ejecutivo@whaka.cl', nombre: 'María Comercial', rol: 'ejecutivo', acceso: 'Leads y pedidos', avatar: 'MC', password: 'exec123' },
-    { email: 'bodega@whaka.cl', nombre: 'Juan Operario', rol: 'bodega', acceso: 'Solo módulo Bodega', avatar: 'JO', password: 'bodega123' },
-    { email: 'reparto@whaka.cl', nombre: 'Pedro Reparto', rol: 'repartidor', acceso: 'Solo módulo Logística', avatar: 'PR', password: 'reparto123' },
+    { email: 'admin@whakachile.cl', nombre: 'Carlos Administrador', rol: 'admin', acceso: 'Acceso total', avatar: 'CA', password: 'Admin123!' },
+    { email: 'ejecutivo@whakachile.cl', nombre: 'María Ejecutiva', rol: 'ejecutivo', acceso: 'Leads y pedidos', avatar: 'ME', password: 'Admin123!' },
+    { email: 'bodega@whakachile.cl', nombre: 'Juan Bodeguero', rol: 'bodega', acceso: 'Solo módulo Bodega', avatar: 'JB', password: 'Admin123!' },
+    { email: 'repartidor@whakachile.cl', nombre: 'Pedro Repartidor', rol: 'repartidor', acceso: 'Solo módulo Logística', avatar: 'PR', password: 'Admin123!' },
 ];
 
 // --- RUTAS DE DESPACHO ---

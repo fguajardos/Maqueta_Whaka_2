@@ -1,5 +1,6 @@
-import React from 'react';
-import { Package, DollarSign, Users, TrendingUp, ArrowUpRight, ArrowDownRight, AlertTriangle, Truck } from 'lucide-react';
+import React, { useState } from 'react';
+import { useAuth } from '../AuthContext';
+import { Package, DollarSign, Users, TrendingUp, ArrowUpRight, ArrowDownRight, AlertTriangle, Truck, Link2, Copy, MessageCircle, Check, X, Loader } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Card from '../../components/Card';
 import Badge from '../../components/Badge';
@@ -7,14 +8,50 @@ import { DASHBOARD_DATA, LEADS, PEDIDOS, CLIENTES, formatCLP, formatDate } from 
 import { COLORS, FONT } from '../../styles/tokens';
 
 const CHART_COLORS = ['#2D7D46', '#1A6B5A', '#B45309', '#1D4ED8', '#6B7280'];
+const WMS_URL = 'http://localhost:3000';
+const CRM_URL = 'http://localhost:5173';
 
 export default function DashboardPage() {
     const { kpis, ventasMensuales, distribucionClientes, topProductos, estadoPedidosHoy } = DASHBOARD_DATA;
+
+    const { wmsToken } = useAuth();
 
     const leadsRecientes = LEADS.slice(0, 5);
     const pedidosListos = PEDIDOS.filter(p => p.estado === 'listo_bodega');
     const clientesBloqueados = CLIENTES.filter(c => c.estadoComercial === 'bloqueado');
     const pedidosIncidencia = PEDIDOS.filter(p => p.estado === 'incidencia');
+    const pedidosEnRuta = PEDIDOS.filter(p => p.estado === 'despachado');
+
+    const [trackingModal, setTrackingModal] = useState(null);
+
+    const generateTrackingLink = async (orderId, cliente) => {
+        setTrackingModal({ orderId, cliente, url: null, loading: true, error: null, copied: false });
+        try {
+            // Usar JWT del WMS si está disponible, si no usar API key como fallback
+            const headers = wmsToken
+                ? { 'Authorization': `Bearer ${wmsToken}`, 'Content-Type': 'application/json' }
+                : { 'x-api-key': 'whaka-internal-2026' };
+
+            const endpoint = wmsToken
+                ? `${WMS_URL}/api/orders/${orderId}/evidence-token`
+                : `${WMS_URL}/api/orders/${orderId}/tracking-link`;
+
+            const res = await fetch(endpoint, { method: 'POST', headers });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || data.message || 'Error al generar link');
+            const fullUrl = `${CRM_URL}${data.url}`;
+            setTrackingModal({ orderId, cliente, url: fullUrl, loading: false, error: null, copied: false });
+        } catch (err) {
+            setTrackingModal(prev => ({ ...prev, loading: false, error: err.message }));
+        }
+    };
+
+    const copyToClipboard = (url) => {
+        navigator.clipboard.writeText(url).then(() => {
+            setTrackingModal(prev => ({ ...prev, copied: true }));
+            setTimeout(() => setTrackingModal(prev => prev ? ({ ...prev, copied: false }) : null), 2000);
+        });
+    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -148,6 +185,111 @@ export default function DashboardPage() {
                     </div>
                 </Card>
             </div>
+
+            {/* Pedidos En Ruta — Link de Seguimiento */}
+            <Card topBorderColor="#1D4ED8">
+                <h3 style={{ ...S.cardTitle, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Link2 size={16} color="#2563EB" /> Pedidos En Ruta — Seguimiento de Entrega
+                </h3>
+                <p style={{ fontSize: FONT.xs, color: COLORS.textLight, margin: '-8px 0 16px 0' }}>
+                    Genera y comparte el link de seguimiento con el cliente para cada pedido despachado.
+                </p>
+                {pedidosEnRuta.length === 0 ? (
+                    <p style={{ fontSize: FONT.sm, color: COLORS.textLight, textAlign: 'center', padding: '16px 0' }}>No hay pedidos en ruta actualmente</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {pedidosEnRuta.map(p => (
+                            <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', backgroundColor: '#EFF6FF', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{ fontSize: FONT.sm, fontWeight: '600', color: '#1E40AF', margin: 0 }}>{p.id}</p>
+                                    <p style={{ fontSize: FONT.xs, color: '#3B82F6', margin: 0 }}>{p.cliente} · {p.comuna}</p>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                    <span style={{ fontSize: FONT.sm, fontWeight: '700', color: '#1D4ED8' }}>{formatCLP(p.total)}</span>
+                                    <button
+                                        onClick={() => generateTrackingLink(p.id, p.cliente)}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', backgroundColor: '#2563EB', color: 'white', border: 'none', borderRadius: '6px', fontSize: FONT.xs, fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                    >
+                                        <Link2 size={12} /> Generar Link
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Card>
+
+            {/* Modal de Tracking Link */}
+            {trackingModal && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
+                    <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                            <h3 style={{ fontSize: FONT.lg, fontWeight: '700', color: COLORS.dark, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Link2 size={18} color="#2563EB" /> Link de Seguimiento
+                            </h3>
+                            <button onClick={() => setTrackingModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '4px' }}>
+                                <X size={20} color="#6B7280" />
+                            </button>
+                        </div>
+
+                        <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#F9FAFB', borderRadius: '8px' }}>
+                            <p style={{ fontSize: FONT.xs, color: COLORS.textLight, margin: '0 0 2px 0' }}>Pedido</p>
+                            <p style={{ fontSize: FONT.sm, fontWeight: '600', color: COLORS.dark, margin: 0 }}>{trackingModal.orderId} · {trackingModal.cliente}</p>
+                        </div>
+
+                        {trackingModal.loading && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '20px', justifyContent: 'center' }}>
+                                <Loader size={20} color="#2563EB" style={{ animation: 'spin 1s linear infinite' }} />
+                                <p style={{ fontSize: FONT.sm, color: '#2563EB', margin: 0 }}>Generando link seguro...</p>
+                            </div>
+                        )}
+
+                        {trackingModal.error && (
+                            <div style={{ padding: '12px', backgroundColor: '#FEF2F2', borderRadius: '8px', marginBottom: '16px' }}>
+                                <p style={{ fontSize: FONT.sm, color: '#DC2626', margin: 0 }}>⚠️ {trackingModal.error}</p>
+                                <p style={{ fontSize: FONT.xs, color: '#EF4444', margin: '4px 0 0 0' }}>Verifica que el servidor WMS esté en ejecución.</p>
+                            </div>
+                        )}
+
+                        {trackingModal.url && !trackingModal.loading && (
+                            <>
+                                <div style={{ marginBottom: '16px' }}>
+                                    <p style={{ fontSize: FONT.xs, color: COLORS.textLight, marginBottom: '6px' }}>Link de seguimiento (comparte con el cliente):</p>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', backgroundColor: '#EFF6FF', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
+                                        <p style={{ fontSize: '11px', color: '#1D4ED8', margin: 0, flex: 1, wordBreak: 'break-all', fontFamily: 'monospace' }}>{trackingModal.url}</p>
+                                        <button
+                                            onClick={() => copyToClipboard(trackingModal.url)}
+                                            style={{ flexShrink: 0, padding: '6px', backgroundColor: trackingModal.copied ? '#D1FAE5' : '#DBEAFE', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                            title="Copiar link"
+                                        >
+                                            {trackingModal.copied ? <Check size={14} color="#16A34A" /> : <Copy size={14} color="#2563EB" />}
+                                        </button>
+                                    </div>
+                                    {trackingModal.copied && <p style={{ fontSize: FONT.xs, color: '#16A34A', margin: '4px 0 0 8px' }}>✓ Copiado al portapapeles</p>}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <a
+                                        href={`https://wa.me/?text=${encodeURIComponent(`Hola! Puedes seguir tu pedido ${trackingModal.orderId} aquí: ${trackingModal.url}`)}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', backgroundColor: '#16A34A', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: FONT.sm, fontWeight: '600' }}
+                                    >
+                                        <MessageCircle size={16} /> Compartir por WhatsApp
+                                    </a>
+                                    <button
+                                        onClick={() => generateTrackingLink(trackingModal.orderId, trackingModal.cliente)}
+                                        title="Generar nuevo link"
+                                        style={{ padding: '10px 14px', backgroundColor: '#F3F4F6', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: FONT.xs, color: '#374151' }}
+                                    >
+                                        Regenerar
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

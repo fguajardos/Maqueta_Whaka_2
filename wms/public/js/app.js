@@ -34,6 +34,16 @@ const App = (() => {
        ROUTER
        ============================================ */
     function init() {
+        // Auto-auth: si el CRM pasa el token WMS por URL param, inyectarlo en sesión
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('token');
+        const urlUser = urlParams.get('user');
+        if (urlToken) {
+            ApiClient.setToken(urlToken);
+            if (urlUser) {
+                try { ApiClient.setUser(JSON.parse(decodeURIComponent(urlUser))); } catch (_) {}
+            }
+        }
         window.addEventListener('hashchange', route);
         route();
     }
@@ -1248,7 +1258,8 @@ const App = (() => {
     async function generateTrackingLink(orderId) {
         try {
             const result = await ApiClient.post(`/api/orders/${orderId}/evidence-token`, {});
-            const fullUrl = `${window.location.origin}/${result.url}`;
+            const crmOrigin = new URLSearchParams(window.location.search).get('crm_url') || 'http://localhost:5173';
+            const fullUrl = `${crmOrigin}${result.url}`;
             prompt('Link de tracking para el cliente (copiar):', fullUrl);
         } catch (err) {
             alert(`Error generando link: ${err.message}`);

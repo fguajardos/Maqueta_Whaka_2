@@ -67,7 +67,7 @@ export class EvidenceService {
             requestPayload: { token: token.substring(0, 8) + '...' },
         });
 
-        const url = `/#tracking?token=${token}`;
+        const url = `/tracking?token=${token}`;
         return { token, url };
     }
 

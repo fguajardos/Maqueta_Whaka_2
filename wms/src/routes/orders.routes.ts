@@ -7,6 +7,18 @@ import { requireRole } from '../middleware/roles';
 import { paginationSchema } from '../utils/pagination';
 
 const router = Router();
+
+// POST /:id/tracking-link — API key auth para integración CRM sin JWT
+router.post('/:id/tracking-link', async (req: Request, res: Response, next: NextFunction) => {
+    if (req.headers['x-api-key'] !== 'whaka-internal-2026') {
+        res.status(401).json({ error: 'API key inválida' });
+        return;
+    }
+    try {
+        res.json(await EvidenceService.generateEvidenceToken(req.params.id, 'sistema_crm'));
+    } catch (err) { next(err); }
+});
+
 router.use(authenticate);
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
