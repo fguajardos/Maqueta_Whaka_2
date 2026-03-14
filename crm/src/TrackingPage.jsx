@@ -11,7 +11,7 @@ import { COLORS, FONT, SHADOW, RADIUS } from './styles/tokens';
 // ─── Mapbox token ───────────────────────────────────────────
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmd1YWphcmRvcyIsImEiOiJjbW1waGR2azgwcXB1MnFxMHhlbGRwejZxIn0.jbxHv5KT4XYPLbx8_FjmtQ';
 
-const WMS_URL = 'http://localhost:3000';
+const WMS_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
 
 // ─── Coordenadas Santiago (maqueta) ─────────────────────────
 const WAREHOUSE = { lng: -70.6097, lat: -33.4322 }; // WhakaChile Bodega, Providencia

@@ -8,8 +8,8 @@ import { DASHBOARD_DATA, LEADS, PEDIDOS, CLIENTES, formatCLP, formatDate } from 
 import { COLORS, FONT } from '../../styles/tokens';
 
 const CHART_COLORS = ['#2D7D46', '#1A6B5A', '#B45309', '#1D4ED8', '#6B7280'];
-const WMS_URL = 'http://localhost:3000';
-const CRM_URL = 'http://localhost:5173';
+const WMS_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
+const CRM_URL = import.meta.env.VITE_CRM_URL || 'http://localhost:5173';
 
 export default function DashboardPage() {
     const { kpis, ventasMensuales, distribucionClientes, topProductos, estadoPedidosHoy } = DASHBOARD_DATA;

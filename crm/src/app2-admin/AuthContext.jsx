@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
-const WMS_URL = 'http://localhost:3000';
+const WMS_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);

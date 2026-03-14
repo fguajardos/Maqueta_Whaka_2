@@ -2,7 +2,8 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
-const CRM_URL = 'http://localhost:5173';
+const WMS_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
+const CRM_URL = import.meta.env.VITE_CRM_URL || 'http://localhost:5173';
 
 export default function WmsPage() {
     const { view } = useParams();
@@ -21,7 +22,7 @@ export default function WmsPage() {
         if (wmsUser) {
             params.set('user', encodeURIComponent(JSON.stringify(wmsUser)));
         }
-        return `http://localhost:3000/?${params.toString()}#${currentView}`;
+        return `${WMS_URL}/?${params.toString()}#${currentView}`;
     };
 
     return (
