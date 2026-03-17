@@ -149,10 +149,10 @@ export const LEADS = [
 
 // --- USUARIOS DEL SISTEMA ---
 export const USUARIOS = [
-    { email: 'admin@whakachile.cl', nombre: 'Carlos Administrador', rol: 'admin', acceso: 'Acceso total', avatar: 'CA', password: 'Admin123!' },
-    { email: 'ejecutivo@whakachile.cl', nombre: 'María Ejecutiva', rol: 'ejecutivo', acceso: 'Leads y pedidos', avatar: 'ME', password: 'Admin123!' },
-    { email: 'bodega@whakachile.cl', nombre: 'Juan Bodeguero', rol: 'bodega', acceso: 'Solo módulo Bodega', avatar: 'JB', password: 'Admin123!' },
-    { email: 'repartidor@whakachile.cl', nombre: 'Pedro Repartidor', rol: 'repartidor', acceso: 'Solo módulo Logística', avatar: 'PR', password: 'Admin123!' },
+    { email: 'admin@whakachile.cl', nombre: 'Carlos Administrador', rol: 'admin', acceso: 'Acceso total al sistema', avatar: 'CA', password: 'Admin123!' },
+    { email: 'ejecutivo@whakachile.cl', nombre: 'María Ejecutiva', rol: 'ejecutivo', acceso: 'Dashboard comercial, Leads, Clientes y Catálogo', avatar: 'ME', password: 'Admin123!' },
+    { email: 'bodega@whakachile.cl', nombre: 'Juan Bodeguero', rol: 'bodega', acceso: 'Dashboard bodega, WMS Stock y Pedidos', avatar: 'JB', password: 'Admin123!' },
+    { email: 'repartidor@whakachile.cl', nombre: 'Pedro Repartidor', rol: 'repartidor', acceso: 'Dashboard entregas, WMS Despacho', avatar: 'PR', password: 'Admin123!' },
 ];
 
 // --- RUTAS DE DESPACHO ---
@@ -307,8 +307,8 @@ export const formatDateTime = (dateStr) => {
 
 // --- PERMISOS POR ROL ---
 export const PERMISOS_ROL = {
-    admin: ['dashboard', 'leads', 'clientes', 'wms', 'catalogo', 'reportes', 'configuracion'],
-    ejecutivo: ['dashboard', 'leads', 'clientes', 'wms'],
-    bodega: ['wms'],
-    repartidor: ['wms'],
+    admin: ['dashboard', 'leads', 'clientes', 'wms_dashboard', 'wms_stock', 'wms_pedidos', 'wms_despacho', 'catalogo', 'reportes', 'configuracion'],
+    ejecutivo: ['dashboard', 'leads', 'clientes', 'catalogo'],
+    bodega: ['dashboard', 'wms_dashboard', 'wms_stock', 'wms_pedidos'],
+    repartidor: ['dashboard', 'wms_dashboard', 'wms_despacho'],
 };

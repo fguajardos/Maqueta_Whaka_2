@@ -32,6 +32,16 @@ function ProtectedRoute({ children, module }) {
     return <AdminLayout>{children}</AdminLayout>;
 }
 
+function WmsRedirect() {
+    const { user } = useAuth();
+    const allowed = PERMISOS_ROL[user?.rol] || [];
+    if (allowed.includes('wms_dashboard')) return <Navigate to="/admin/wms/dashboard" replace />;
+    if (allowed.includes('wms_stock')) return <Navigate to="/admin/wms/stock" replace />;
+    if (allowed.includes('wms_pedidos')) return <Navigate to="/admin/wms/pedidos" replace />;
+    if (allowed.includes('wms_despacho')) return <Navigate to="/admin/wms/despacho" replace />;
+    return <Navigate to="/admin" replace />;
+}
+
 function AdminRoutes() {
     const { isAuthenticated } = useAuth();
     if (!isAuthenticated) return <LoginPage />;
@@ -41,8 +51,11 @@ function AdminRoutes() {
             <Route path="/" element={<ProtectedRoute module="dashboard"><DashboardPage /></ProtectedRoute>} />
             <Route path="/leads" element={<ProtectedRoute module="leads"><LeadsPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute module="clientes"><ClientesPage /></ProtectedRoute>} />
-            <Route path="/wms" element={<Navigate to="/admin/wms/dashboard" replace />} />
-            <Route path="/wms/:view" element={<ProtectedRoute module="wms"><WmsPage /></ProtectedRoute>} />
+            <Route path="/wms" element={<WmsRedirect />} />
+            <Route path="/wms/dashboard" element={<ProtectedRoute module="wms_dashboard"><WmsPage /></ProtectedRoute>} />
+            <Route path="/wms/stock" element={<ProtectedRoute module="wms_stock"><WmsPage /></ProtectedRoute>} />
+            <Route path="/wms/pedidos" element={<ProtectedRoute module="wms_pedidos"><WmsPage /></ProtectedRoute>} />
+            <Route path="/wms/despacho" element={<ProtectedRoute module="wms_despacho"><WmsPage /></ProtectedRoute>} />
             <Route path="/catalogo" element={<ProtectedRoute module="catalogo"><CatalogoPage /></ProtectedRoute>} />
             <Route path="/reportes" element={<ProtectedRoute module="reportes"><ReportesPage /></ProtectedRoute>} />
             <Route path="/configuracion" element={<ProtectedRoute module="configuracion"><ConfiguracionPage /></ProtectedRoute>} />
