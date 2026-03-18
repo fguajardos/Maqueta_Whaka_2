@@ -312,3 +312,115 @@ export const PERMISOS_ROL = {
     bodega: ['dashboard', 'wms_dashboard', 'wms_stock', 'wms_pedidos'],
     repartidor: ['dashboard', 'wms_dashboard', 'wms_despacho'],
 };
+
+// --- PERFIL VISUAL POR ROL ---
+export const PERFIL_ROL = {
+    admin: {
+        titulo: 'Administrador',
+        subtitulo: 'Acceso total al sistema',
+        color: '#7C3AED',
+        colorLight: '#F5F3FF',
+        colorBorder: '#DDD6FE',
+        colorText: '#5B21B6',
+        gradientFrom: '#7C3AED',
+        gradientTo: '#6D28D9',
+        saludo: 'Panel de Control',
+        descripcion: 'Supervisión completa de operaciones, ventas y logística.',
+        accionesRapidas: [
+            { label: 'Ver Reportes', path: '/admin/reportes', icon: 'BarChart3' },
+            { label: 'Configuración', path: '/admin/configuracion', icon: 'Settings' },
+            { label: 'Gestionar Leads', path: '/admin/leads', icon: 'Users' },
+            { label: 'WMS Dashboard', path: '/admin/wms/dashboard', icon: 'Layers' },
+        ],
+    },
+    ejecutivo: {
+        titulo: 'Ejecutivo de Ventas',
+        subtitulo: 'Gestión comercial',
+        color: '#2D7D46',
+        colorLight: '#F0FDF4',
+        colorBorder: '#BBF7D0',
+        colorText: '#166534',
+        gradientFrom: '#2D7D46',
+        gradientTo: '#15803D',
+        saludo: 'Panel Comercial',
+        descripcion: 'Gestión de leads, clientes y seguimiento de ventas.',
+        accionesRapidas: [
+            { label: 'Nuevo Lead', path: '/admin/leads', icon: 'Users' },
+            { label: 'Ver Clientes', path: '/admin/clientes', icon: 'UserCheck' },
+            { label: 'Catálogo', path: '/admin/catalogo', icon: 'ShoppingBag' },
+        ],
+    },
+    bodega: {
+        titulo: 'Bodeguero',
+        subtitulo: 'Operaciones de bodega',
+        color: '#B45309',
+        colorLight: '#FFFBEB',
+        colorBorder: '#FDE68A',
+        colorText: '#92400E',
+        gradientFrom: '#B45309',
+        gradientTo: '#D97706',
+        saludo: 'Panel de Bodega',
+        descripcion: 'Control de inventario, preparación de pedidos y stock.',
+        accionesRapidas: [
+            { label: 'WMS Stock', path: '/admin/wms/stock', icon: 'Box' },
+            { label: 'WMS Pedidos', path: '/admin/wms/pedidos', icon: 'ShoppingCart' },
+            { label: 'WMS Dashboard', path: '/admin/wms/dashboard', icon: 'Layers' },
+        ],
+    },
+    repartidor: {
+        titulo: 'Repartidor',
+        subtitulo: 'Logística y despacho',
+        color: '#1D4ED8',
+        colorLight: '#EFF6FF',
+        colorBorder: '#BFDBFE',
+        colorText: '#1E40AF',
+        gradientFrom: '#1D4ED8',
+        gradientTo: '#2563EB',
+        saludo: 'Panel de Entregas',
+        descripcion: 'Rutas activas, despachos y seguimiento de entregas.',
+        accionesRapidas: [
+            { label: 'WMS Despacho', path: '/admin/wms/despacho', icon: 'Truck' },
+            { label: 'WMS Dashboard', path: '/admin/wms/dashboard', icon: 'Layers' },
+        ],
+    },
+};
+
+// --- PERMISOS GRANULARES POR ROL ---
+export const PERMISOS_GRANULARES = {
+    admin: {
+        leads:         { ver: true, crear: true, editar: true, eliminar: true, asignar: true },
+        clientes:      { ver: true, crear: true, editar: true, eliminar: true, bloquear: true },
+        pedidos:       { ver: true, crear: true, editar: true, cancelar: true, facturar: true },
+        stock:         { ver: true, ajustar: true, transferir: true },
+        despacho:      { ver: true, asignarRuta: true, confirmarEntrega: true },
+        catalogo:      { ver: true, crear: true, editar: true, eliminar: true },
+        reportes:      { ver: true, exportar: true },
+        configuracion: { ver: true, editar: true },
+        usuarios:      { ver: true, crear: true, editar: true, desactivar: true },
+    },
+    ejecutivo: {
+        leads:    { ver: true, crear: true, editar: true, eliminar: false, asignar: false },
+        clientes: { ver: true, crear: false, editar: false, eliminar: false, bloquear: false },
+        pedidos:  { ver: true, crear: true, editar: false, cancelar: false, facturar: false },
+        catalogo: { ver: true, crear: false, editar: false, eliminar: false },
+        reportes: { ver: false, exportar: false },
+    },
+    bodega: {
+        pedidos:  { ver: true, crear: false, editar: false, cancelar: false, facturar: false },
+        stock:    { ver: true, ajustar: true, transferir: false },
+        despacho: { ver: true, asignarRuta: false, confirmarEntrega: false },
+        catalogo: { ver: false, crear: false, editar: false, eliminar: false },
+    },
+    repartidor: {
+        pedidos:  { ver: true, crear: false, editar: false, cancelar: false, facturar: false },
+        despacho: { ver: true, asignarRuta: false, confirmarEntrega: true },
+        stock:    { ver: false, ajustar: false, transferir: false },
+    },
+};
+
+// --- HELPER: Verificar permiso granular ---
+export const tienePermiso = (rol, modulo, accion) => {
+    const permisos = PERMISOS_GRANULARES[rol];
+    if (!permisos || !permisos[modulo]) return false;
+    return permisos[modulo][accion] === true;
+};

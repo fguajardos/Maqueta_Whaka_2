@@ -1,30 +1,92 @@
 import { useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { Package, DollarSign, Users, TrendingUp, ArrowUpRight, ArrowDownRight, AlertTriangle, Truck, Link2, Copy, MessageCircle, Check, X, Loader, Box, ClipboardList, MapPin, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Package, DollarSign, Users, TrendingUp, ArrowUpRight, ArrowDownRight, AlertTriangle, Truck, Link2, Copy, MessageCircle, Check, X, Loader, Box, ClipboardList, MapPin, CheckCircle, Shield, BarChart3, Settings, UserCheck, ShoppingBag, Layers, ShoppingCart } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Card from '../../components/Card';
 import Badge from '../../components/Badge';
-import { DASHBOARD_DATA, LEADS, PEDIDOS, CLIENTES, PRODUCTOS, RUTAS, formatCLP } from '../../data/mockData';
-import { COLORS, FONT } from '../../styles/tokens';
+import { DASHBOARD_DATA, LEADS, PEDIDOS, CLIENTES, PRODUCTOS, RUTAS, formatCLP, PERFIL_ROL } from '../../data/mockData';
+import { COLORS, FONT, RADIUS } from '../../styles/tokens';
 
 const CHART_COLORS = ['#2D7D46', '#1A6B5A', '#B45309', '#1D4ED8', '#6B7280'];
 const WMS_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
 const CRM_URL = import.meta.env.VITE_CRM_URL || 'http://localhost:5173';
 
+const ICON_MAP = { BarChart3, Settings, Users, Layers, UserCheck, ShoppingBag, Box, ShoppingCart, Truck };
+
 export default function DashboardPage() {
     const { user, wmsToken } = useAuth();
     const rol = user?.rol || 'admin';
 
-    if (rol === 'ejecutivo') return <DashboardEjecutivo />;
-    if (rol === 'bodega') return <DashboardBodega />;
-    if (rol === 'repartidor') return <DashboardRepartidor wmsToken={wmsToken} />;
-    return <DashboardAdmin wmsToken={wmsToken} />;
+    if (rol === 'ejecutivo') return <DashboardEjecutivo user={user} />;
+    if (rol === 'bodega') return <DashboardBodega user={user} />;
+    if (rol === 'repartidor') return <DashboardRepartidor wmsToken={wmsToken} user={user} />;
+    return <DashboardAdmin wmsToken={wmsToken} user={user} />;
+}
+
+// ══════════════════════════════════════════════════════
+// BANNER DE BIENVENIDA POR ROL
+// ══════════════════════════════════════════════════════
+function WelcomeBanner({ user }) {
+    const navigate = useNavigate();
+    const perfil = PERFIL_ROL[user?.rol] || PERFIL_ROL.admin;
+    const hora = new Date().getHours();
+    const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+
+    return (
+        <div style={{
+            background: `linear-gradient(135deg, ${perfil.gradientFrom}, ${perfil.gradientTo})`,
+            borderRadius: RADIUS.xxl || '16px',
+            padding: '24px 28px',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '24px',
+            flexWrap: 'wrap',
+        }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <Shield size={16} style={{ opacity: 0.8 }} />
+                    <span style={{ fontSize: FONT.xs, fontWeight: '600', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{perfil.titulo}</span>
+                </div>
+                <h1 style={{ fontSize: FONT.xxl, fontWeight: '700', margin: '0 0 4px 0' }}>
+                    {saludo}, {user?.nombre?.split(' ')[0]}
+                </h1>
+                <p style={{ fontSize: FONT.sm, margin: 0, opacity: 0.85 }}>{perfil.descripcion}</p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {perfil.accionesRapidas.map((accion, i) => {
+                    const Icon = ICON_MAP[accion.icon];
+                    return (
+                        <button
+                            key={i}
+                            onClick={() => navigate(accion.path)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                padding: '8px 14px', borderRadius: '10px',
+                                backgroundColor: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)',
+                                color: 'white', fontSize: FONT.xs, fontWeight: '600',
+                                cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
+                                fontFamily: FONT.family,
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.35)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'; }}
+                        >
+                            {Icon && <Icon size={14} />}
+                            {accion.label}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
 }
 
 // ══════════════════════════════════════════════════════
 // DASHBOARD ADMIN — Vista completa de todo el sistema
 // ══════════════════════════════════════════════════════
-function DashboardAdmin({ wmsToken }) {
+function DashboardAdmin({ wmsToken, user }) {
     const { kpis, ventasMensuales, distribucionClientes, topProductos, estadoPedidosHoy } = DASHBOARD_DATA;
     const leadsRecientes = LEADS.slice(0, 5);
     const pedidosListos = PEDIDOS.filter(p => p.estado === 'listo_bodega');
@@ -35,10 +97,7 @@ function DashboardAdmin({ wmsToken }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-                <h1 style={{ fontSize: FONT.xxl, fontWeight: '700', color: COLORS.dark, margin: 0 }}>Dashboard General</h1>
-                <p style={{ fontSize: FONT.sm, color: COLORS.textLight, margin: '4px 0 0 0' }}>Vista completa del sistema — Administrador</p>
-            </div>
+            <WelcomeBanner user={user} />
 
             {/* KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
@@ -173,7 +232,7 @@ function DashboardAdmin({ wmsToken }) {
 // ══════════════════════════════════════════════════════
 // DASHBOARD EJECUTIVO — Foco en ventas, leads y clientes
 // ══════════════════════════════════════════════════════
-function DashboardEjecutivo() {
+function DashboardEjecutivo({ user }) {
     const { kpis, ventasMensuales, distribucionClientes, topProductos } = DASHBOARD_DATA;
     const leadsRecientes = LEADS.slice(0, 5);
     const leadsPorEstado = [
@@ -187,10 +246,7 @@ function DashboardEjecutivo() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-                <h1 style={{ fontSize: FONT.xxl, fontWeight: '700', color: COLORS.dark, margin: 0 }}>Dashboard Comercial</h1>
-                <p style={{ fontSize: FONT.sm, color: COLORS.textLight, margin: '4px 0 0 0' }}>Ventas, leads y clientes — Ejecutivo de Ventas</p>
-            </div>
+            <WelcomeBanner user={user} />
 
             {/* KPIs Comerciales */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
@@ -298,7 +354,7 @@ function DashboardEjecutivo() {
 // ══════════════════════════════════════════════════════
 // DASHBOARD BODEGA — Foco en stock, pedidos y preparación
 // ══════════════════════════════════════════════════════
-function DashboardBodega() {
+function DashboardBodega({ user }) {
     const { kpis, estadoPedidosHoy } = DASHBOARD_DATA;
     const pedidosListos = PEDIDOS.filter(p => p.estado === 'listo_bodega');
     const pedidosPorPreparar = PEDIDOS.filter(p => ['recibido', 'validado', 'en_preparacion'].includes(p.estado));
@@ -314,10 +370,7 @@ function DashboardBodega() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-                <h1 style={{ fontSize: FONT.xxl, fontWeight: '700', color: COLORS.dark, margin: 0 }}>Dashboard Bodega</h1>
-                <p style={{ fontSize: FONT.sm, color: COLORS.textLight, margin: '4px 0 0 0' }}>Stock, pedidos y preparación — Bodeguero</p>
-            </div>
+            <WelcomeBanner user={user} />
 
             {/* KPIs Bodega */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
@@ -427,7 +480,7 @@ function DashboardBodega() {
 // ══════════════════════════════════════════════════════
 // DASHBOARD REPARTIDOR — Foco en entregas, rutas y tracking
 // ══════════════════════════════════════════════════════
-function DashboardRepartidor({ wmsToken }) {
+function DashboardRepartidor({ wmsToken, user }) {
     const pedidosEnRuta = PEDIDOS.filter(p => p.estado === 'despachado');
     const pedidosEntregados = PEDIDOS.filter(p => p.estado === 'entregado');
     const pedidosListos = PEDIDOS.filter(p => p.estado === 'listo_bodega');
@@ -442,10 +495,7 @@ function DashboardRepartidor({ wmsToken }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-                <h1 style={{ fontSize: FONT.xxl, fontWeight: '700', color: COLORS.dark, margin: 0 }}>Dashboard Entregas</h1>
-                <p style={{ fontSize: FONT.sm, color: COLORS.textLight, margin: '4px 0 0 0' }}>Rutas, despachos y seguimiento — Repartidor</p>
-            </div>
+            <WelcomeBanner user={user} />
 
             {/* KPIs Repartidor */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>

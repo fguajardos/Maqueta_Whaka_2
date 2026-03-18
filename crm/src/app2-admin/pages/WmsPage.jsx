@@ -1,14 +1,16 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
 const WMS_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
 const CRM_URL = import.meta.env.VITE_CRM_URL || 'http://localhost:5173';
 
 export default function WmsPage() {
-    const { view } = useParams();
+    const location = useLocation();
     const { wmsToken, wmsUser } = useAuth();
-    const currentView = view || 'dashboard';
+    // Extraer la vista del path: /admin/wms/stock → stock
+    const segments = location.pathname.split('/');
+    const currentView = segments[segments.length - 1] || 'dashboard';
 
     // Construir URL del iframe con token para auto-auth y crm_url para links correctos
     const buildIframeSrc = () => {

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\\\Users\\\\the_r\\\\Desktop\\\\WhakaChile_Integracion\\\\crm\\\\src\\\\app2-admin\\\\pages\"\" && ls \"C:Usersthe_rDesktopWhakaChile_Integracioncrmsrcapp2-admin\"\")",
+      "Bash(netstat -ano)",
+      "Read(//c/Users/the_r/Desktop/WhakaChile_Integracion/**)"
+    ]
+  }
+}

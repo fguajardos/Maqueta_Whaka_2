@@ -165,9 +165,10 @@ export default function TrackingPage() {
             markerDest.current = null;
         }
 
-        // Remover capa de ruta previa
-        if (map.current.getLayer('route')) map.current.removeLayer('route');
-        if (map.current.getLayer('route-arrow')) map.current.removeLayer('route-arrow');
+        // Remover capas de ruta previas
+        ['route', 'route-shadow', 'route-arrow'].forEach(id => {
+            if (map.current.getLayer(id)) map.current.removeLayer(id);
+        });
         if (map.current.getSource('route')) map.current.removeSource('route');
 
         // Marker de destino (cliente)
@@ -189,38 +190,96 @@ export default function TrackingPage() {
             ))
             .addTo(map.current);
 
-        // Dibujar ruta si está despachado o entregado
+        // Dibujar ruta real usando Mapbox Directions API
         if (enRuta) {
-            // Puntos intermedios para curva natural
-            const midLng = (WAREHOUSE.lng + dest.lng) / 2;
-            const midLat = (WAREHOUSE.lat + dest.lat) / 2 + 0.008;
+            const directionsUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${WAREHOUSE.lng},${WAREHOUSE.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true&language=es&access_token=${mapboxgl.accessToken}`;
 
-            map.current.addSource('route', {
-                type: 'geojson',
-                data: {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: [
-                            [WAREHOUSE.lng, WAREHOUSE.lat],
-                            [midLng, midLat],
-                            [dest.lng, dest.lat],
-                        ],
-                    },
-                },
-            });
+            fetch(directionsUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.routes || !data.routes[0] || !map.current) return;
 
-            map.current.addLayer({
-                id: 'route',
-                type: 'line',
-                source: 'route',
-                layout: { 'line-join': 'round', 'line-cap': 'round' },
-                paint: {
-                    'line-color': estado === 'entregado' ? '#15803D' : COLORS.primary,
-                    'line-width': 4,
-                    'line-dasharray': estado === 'entregado' ? [1] : [2, 1],
-                },
-            });
+                    const route = data.routes[0];
+                    const routeGeometry = route.geometry;
+
+                    // Guardar info de ruta para mostrar distancia/duración
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    const durMin = Math.round(route.duration / 60);
+
+                    // Agregar source con la geometría real
+                    if (map.current.getSource('route')) return; // evitar duplicados
+                    map.current.addSource('route', {
+                        type: 'geojson',
+                        data: {
+                            type: 'Feature',
+                            properties: {},
+                            geometry: routeGeometry,
+                        },
+                    });
+
+                    // Capa de sombra para dar profundidad
+                    map.current.addLayer({
+                        id: 'route-shadow',
+                        type: 'line',
+                        source: 'route',
+                        layout: { 'line-join': 'round', 'line-cap': 'round' },
+                        paint: {
+                            'line-color': '#00000020',
+                            'line-width': 8,
+                            'line-blur': 4,
+                        },
+                    });
+
+                    // Capa principal de la ruta
+                    map.current.addLayer({
+                        id: 'route',
+                        type: 'line',
+                        source: 'route',
+                        layout: { 'line-join': 'round', 'line-cap': 'round' },
+                        paint: {
+                            'line-color': estado === 'entregado' ? '#15803D' : COLORS.primary,
+                            'line-width': 5,
+                            'line-dasharray': estado === 'entregado' ? [1] : [2, 1],
+                        },
+                    });
+
+                    // Agregar badge de distancia y tiempo sobre el mapa
+                    const infoEl = document.getElementById('route-info');
+                    if (infoEl) {
+                        infoEl.textContent = `${distKm} km · ${durMin} min aprox.`;
+                        infoEl.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.warn('Directions API error, usando línea directa:', err);
+                    // Fallback: línea recta si la API falla
+                    if (map.current && !map.current.getSource('route')) {
+                        map.current.addSource('route', {
+                            type: 'geojson',
+                            data: {
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'LineString',
+                                    coordinates: [
+                                        [WAREHOUSE.lng, WAREHOUSE.lat],
+                                        [dest.lng, dest.lat],
+                                    ],
+                                },
+                            },
+                        });
+                        map.current.addLayer({
+                            id: 'route',
+                            type: 'line',
+                            source: 'route',
+                            layout: { 'line-join': 'round', 'line-cap': 'round' },
+                            paint: {
+                                'line-color': estado === 'entregado' ? '#15803D' : COLORS.primary,
+                                'line-width': 4,
+                                'line-dasharray': [2, 1],
+                            },
+                        });
+                    }
+                });
         }
 
         // Ajustar vista para mostrar ambos puntos
@@ -296,6 +355,19 @@ export default function TrackingPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Info de ruta (distancia y tiempo) */}
+                <div
+                    id="route-info"
+                    style={{
+                        display: 'none',
+                        position: 'absolute', bottom: 12, right: 12,
+                        background: 'white', borderRadius: RADIUS.lg,
+                        padding: '8px 14px', boxShadow: SHADOW.md,
+                        fontSize: FONT.sm, fontWeight: '600',
+                        color: COLORS.primary,
+                    }}
+                />
 
                 {/* Leyenda */}
                 <div style={{

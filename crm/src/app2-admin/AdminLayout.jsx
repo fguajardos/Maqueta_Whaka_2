@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { PERMISOS_ROL } from '../data/mockData';
+import { PERMISOS_ROL, PERFIL_ROL } from '../data/mockData';
 import {
     LayoutDashboard, Users, UserCheck, ShoppingBag,
-    BarChart3, Settings, LogOut, Menu, Bell, Search, Layers, Box, ShoppingCart, Truck
+    BarChart3, Settings, LogOut, Menu, Bell, Search, Layers, Box, ShoppingCart, Truck, Shield
 } from 'lucide-react';
 import { COLORS, RADIUS, FONT, SHADOW } from '../styles/tokens';
 import logoFull from '../assets/logo-whaka.svg';
@@ -31,6 +31,7 @@ export default function AdminLayout({ children }) {
 
     const allowedModules = PERMISOS_ROL[user?.rol] || [];
     const visibleItems = NAV_ITEMS.filter(item => allowedModules.includes(item.key));
+    const perfil = PERFIL_ROL[user?.rol] || PERFIL_ROL.admin;
 
     const handleLogout = () => { logout(); navigate('/admin'); };
 
@@ -49,6 +50,27 @@ export default function AdminLayout({ children }) {
                     )}
                 </div>
 
+                {/* Role Badge */}
+                {sidebarOpen ? (
+                    <div style={{ padding: '12px 16px', borderBottom: `1px solid ${COLORS.borderLight}`, backgroundColor: perfil.colorLight }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: perfil.color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <Shield size={14} color={perfil.color} />
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: FONT.xs, fontWeight: '700', color: perfil.colorText, lineHeight: '1.2' }}>{perfil.titulo}</div>
+                                <div style={{ fontSize: '10px', color: perfil.color, opacity: 0.8 }}>{perfil.subtitulo}</div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ padding: '8px 0', display: 'flex', justifyContent: 'center', borderBottom: `1px solid ${COLORS.borderLight}`, backgroundColor: perfil.colorLight }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: perfil.color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Shield size={14} color={perfil.color} />
+                        </div>
+                    </div>
+                )}
+
                 {/* Nav */}
                 <nav style={styles.nav}>
                     {visibleItems.map(item => (
@@ -56,6 +78,8 @@ export default function AdminLayout({ children }) {
                             key={item.key}
                             item={item}
                             showLabel={sidebarOpen}
+                            rolColor={perfil.color}
+                            rolColorLight={perfil.colorLight}
                             onClick={() => setMobileSidebarOpen(false)}
                         />
                     ))}
@@ -64,11 +88,11 @@ export default function AdminLayout({ children }) {
                 {/* User */}
                 <div style={styles.userSection}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                        <div style={styles.avatar}>{user?.avatar}</div>
+                        <div style={{ ...styles.avatar, backgroundColor: perfil.color }}>{user?.avatar}</div>
                         {sidebarOpen && (
                             <div style={{ minWidth: 0 }}>
                                 <div style={{ fontSize: FONT.sm, fontWeight: '500', color: '#1F2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.nombre}</div>
-                                <div style={{ fontSize: FONT.xs, color: COLORS.textLight, textTransform: 'capitalize' }}>{user?.rol}</div>
+                                <div style={{ fontSize: FONT.xs, color: perfil.color, fontWeight: '600' }}>{perfil.titulo}</div>
                             </div>
                         )}
                     </div>
@@ -86,9 +110,20 @@ export default function AdminLayout({ children }) {
                         <div style={styles.logoSection}>
                             <img src={logoFull} alt="Acaí Whaka" style={{ height: '40px', objectFit: 'contain' }} />
                         </div>
+                        <div style={{ padding: '12px 16px', borderBottom: `1px solid ${COLORS.borderLight}`, backgroundColor: perfil.colorLight }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: perfil.color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Shield size={14} color={perfil.color} />
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: FONT.xs, fontWeight: '700', color: perfil.colorText }}>{perfil.titulo}</div>
+                                    <div style={{ fontSize: '10px', color: perfil.color, opacity: 0.8 }}>{perfil.subtitulo}</div>
+                                </div>
+                            </div>
+                        </div>
                         <nav style={styles.nav}>
                             {visibleItems.map(item => (
-                                <NavItem key={item.key} item={item} showLabel onClick={() => setMobileSidebarOpen(false)} />
+                                <NavItem key={item.key} item={item} showLabel rolColor={perfil.color} rolColorLight={perfil.colorLight} onClick={() => setMobileSidebarOpen(false)} />
                             ))}
                         </nav>
                     </aside>
@@ -109,6 +144,12 @@ export default function AdminLayout({ children }) {
                         <Menu size={20} color={COLORS.textLight} />
                     </button>
 
+                    {/* Role indicator in topbar */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', backgroundColor: perfil.colorLight, border: `1px solid ${perfil.colorBorder}` }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: perfil.color }} />
+                        <span style={{ fontSize: FONT.xs, fontWeight: '600', color: perfil.colorText }}>{perfil.titulo}</span>
+                    </div>
+
                     <div style={styles.searchBox}>
                         <Search size={16} color={COLORS.textLight} />
                         <input type="text" placeholder="Buscar..." style={styles.searchInput} />
@@ -119,7 +160,7 @@ export default function AdminLayout({ children }) {
                             <Bell size={20} color={COLORS.textLight} />
                             <span style={styles.bellDot} />
                         </button>
-                        <div style={styles.avatarSmall}>{user?.avatar}</div>
+                        <div style={{ ...styles.avatarSmall, backgroundColor: perfil.color }}>{user?.avatar}</div>
                     </div>
                 </header>
 
@@ -131,7 +172,7 @@ export default function AdminLayout({ children }) {
 }
 
 /* ── NavItem sub-component ── */
-function NavItem({ item, showLabel, onClick }) {
+function NavItem({ item, showLabel, rolColor, rolColorLight, onClick }) {
     const [hovered, setHovered] = useState(false);
 
     return (
@@ -149,8 +190,8 @@ function NavItem({ item, showLabel, onClick }) {
                 fontWeight: '500',
                 textDecoration: 'none',
                 transition: 'all 0.15s',
-                backgroundColor: isActive ? COLORS.primaryLight : hovered ? COLORS.bgAlt : 'transparent',
-                color: isActive ? COLORS.primary : '#4B5563',
+                backgroundColor: isActive ? (rolColorLight || COLORS.primaryLight) : hovered ? COLORS.bgAlt : 'transparent',
+                color: isActive ? (rolColor || COLORS.primary) : '#4B5563',
             })}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
