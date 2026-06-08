@@ -10,6 +10,7 @@ import WmsPage from './pages/WmsPage';
 import CatalogoPage from './pages/CatalogoPage';
 import ReportesPage from './pages/ReportesPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
+import PedidosWhatsAppPage from './pages/PedidosWhatsAppPage';
 import { PERMISOS_ROL } from '../data/mockData';
 import { COLORS, FONT } from '../styles/tokens';
 
@@ -58,6 +59,7 @@ function AdminRoutes() {
             <Route path="/wms/despacho" element={<ProtectedRoute module="wms_despacho"><WmsPage /></ProtectedRoute>} />
             <Route path="/catalogo" element={<ProtectedRoute module="catalogo"><CatalogoPage /></ProtectedRoute>} />
             <Route path="/reportes" element={<ProtectedRoute module="reportes"><ReportesPage /></ProtectedRoute>} />
+            <Route path="/pedidos-whatsapp" element={<ProtectedRoute module="dashboard"><PedidosWhatsAppPage /></ProtectedRoute>} />
             <Route path="/configuracion" element={<ProtectedRoute module="configuracion"><ConfiguracionPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>

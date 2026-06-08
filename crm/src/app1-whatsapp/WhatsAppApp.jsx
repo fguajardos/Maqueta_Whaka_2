@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, MoreVertical, Smile, Send, ArrowLeft, Leaf, User, ChevronRight, CheckCheck, Clock } from 'lucide-react';
+import { Phone, MoreVertical, Smile, Send, ArrowLeft, Leaf, User, ChevronRight, CheckCheck, Clock, Zap } from 'lucide-react';
 import { PRODUCTOS, CATEGORIAS, CLIENTES, formatCLP } from '../data/mockData';
+import BotPedidosWhatsApp from './BotPedidosWhatsApp';
 
 /* ================================================================
    FLOW ENGINE — State machine driving both Etapa 0 and Etapa 1
@@ -371,6 +372,7 @@ const ETAPA1_STEPS = {
    ================================================================ */
 
 export default function WhatsAppApp() {
+    const [modoApp, setModoApp] = useState('menu'); // 'menu' | 'chat' | 'bot'
     const [session, setSession] = useState('lead'); // 'lead' | 'cliente'
     const [messages, setMessages] = useState([]);
     const [currentStep, setCurrentStep] = useState(null);
@@ -517,6 +519,83 @@ export default function WhatsAppApp() {
     const steps = getSteps();
     const step = currentStep ? steps[currentStep] : null;
 
+    // Mostrar menu de selección
+    if (modoApp === 'menu') {
+        return (
+            <div className="h-screen flex flex-col items-center justify-center bg-[#111827] p-6">
+                <div className="max-w-2xl w-full">
+                    <div className="text-center mb-12">
+                        <div className="w-20 h-20 rounded-full bg-[#2D7D46]/20 flex items-center justify-center mx-auto mb-4">
+                            <Leaf className="w-10 h-10 text-[#2D7D46]" />
+                        </div>
+                        <h1 className="text-4xl font-bold text-white mb-2">WhakaChile</h1>
+                        <p className="text-white/60 text-lg">Sistema de Conversación y Pedidos</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <button
+                            onClick={() => setModoApp('chat')}
+                            className="w-full p-6 bg-gradient-to-r from-[#2D7D46] to-[#1A6B5A] rounded-lg hover:from-[#236335] hover:to-[#125047] transition-all transform hover:scale-105 text-left"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-white font-bold text-lg mb-2">💬 Chat Tradicional</h2>
+                                    <p className="text-[#A7F3D0] text-sm">Flujo completo de onboarding y compra digital (Etapa 0 y 1)</p>
+                                </div>
+                                <ChevronRight className="w-6 h-6 text-white/60" />
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => setModoApp('bot')}
+                            className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all transform hover:scale-105 text-left"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                                        <Zap className="w-5 h-5" />
+                                        Bot de Pedidos (NUEVO)
+                                    </h2>
+                                    <p className="text-blue-100 text-sm">Sistema de pedidos estructurado sin errores (Cliente crea pedido paso a paso)</p>
+                                </div>
+                                <ChevronRight className="w-6 h-6 text-white/60" />
+                            </div>
+                        </button>
+
+                        <Link to="/" className="w-full p-3 text-center text-white/60 hover:text-white transition-colors text-sm">
+                            ← Volver al inicio
+                        </Link>
+                    </div>
+
+                    <div className="mt-12 pt-8 border-t border-white/10">
+                        <p className="text-white/40 text-xs text-center">
+                            Para mañana: demostrar flujo del Bot de Pedidos que elimina errores manuales
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Mostrar Bot de Pedidos
+    if (modoApp === 'bot') {
+        return (
+            <div className="h-screen flex flex-col">
+                <div className="h-12 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center px-4">
+                    <button
+                        onClick={() => setModoApp('menu')}
+                        className="text-white hover:text-blue-100 transition-colors flex items-center gap-2"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span className="text-sm">Volver al menú</span>
+                    </button>
+                </div>
+                <BotPedidosWhatsApp />
+            </div>
+        );
+    }
+
+    // Mostrar Chat Tradicional
     return (
         <div className="h-screen flex bg-[#111827] overflow-hidden">
             {/* Sidebar */}
