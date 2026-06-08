@@ -77,12 +77,12 @@ export class WhatsAppOrdersService {
           entityType: 'whatsapp_order',
           entityId: whatsappOrder.id,
           sourceSystem: 'whatsapp',
-          requestPayload: data,
+          requestPayload: data as any,
           responseSummary: {
             success: errors.length === 0,
             errors: errors.length > 0 ? errors : undefined,
             orderId: whatsappOrder.id,
-          },
+          } as any,
           status: errors.length === 0 ? 'success' : 'failed',
         },
       });
