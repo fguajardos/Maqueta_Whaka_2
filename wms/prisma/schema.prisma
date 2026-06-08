@@ -153,3 +153,57 @@ enum WebhookSource {
   bsale
   syncmanager
 }
+
+// ============================================
+// Pedidos desde WhatsApp Bot
+// ============================================
+model WhatsAppOrder {
+  id                  String    @id @default(cuid())
+  clientPhone         String    @map("client_phone")
+  clientName          String    @map("client_name")
+  clientId            String?   @map("client_id")
+
+  productId           String    @map("product_id")
+  productName         String    @map("product_name")
+  quantity            Float
+  unitOfMeasure       String    @map("unit_of_measure")
+  unitPrice           Float?    @map("unit_price")
+  subtotal            Float?
+
+  deliveryType        String    @map("delivery_type")
+  address             String?
+  city                String?
+  reference           String?
+
+  paymentMethod       String    @map("payment_method")
+
+  status              String    @default("confirmado")
+  validationErrors    Json      @default("[]") @map("validation_errors")
+
+  orderId             String?   @map("order_id")
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  processedAt         DateTime? @map("processed_at")
+
+  @@index([clientPhone])
+  @@index([status])
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("whatsapp_orders")
+}
+
+model WhatsAppSession {
+  id                String    @id @default(cuid())
+  clientPhone       String    @unique @map("client_phone")
+
+  currentStep       String    @map("current_step")
+  orderData         Json      @default("{}")
+
+  startedAt         DateTime  @default(now()) @map("started_at")
+  lastActivityAt    DateTime  @updatedAt @map("last_activity_at")
+  expiresAt         DateTime  @map("expires_at")
+
+  @@index([clientPhone])
+  @@index([lastActivityAt])
+  @@map("whatsapp_sessions")
+}

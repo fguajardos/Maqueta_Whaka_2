@@ -2,11 +2,67 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { OrdersService } from '../services/orders.service';
 import { EvidenceService } from '../services/evidence.service';
+import { WhatsAppOrdersService } from '../services/whatsappOrders.service';
 import { authenticate } from '../middleware/auth';
 import { requireRole } from '../middleware/roles';
 import { paginationSchema } from '../utils/pagination';
 
 const router = Router();
+
+// =====================================================
+// Endpoints WhatsApp Bot (sin autenticación JWT)
+// =====================================================
+
+// POST /whatsapp/create — Crear orden desde WhatsApp Bot
+router.post('/whatsapp/create', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await WhatsAppOrdersService.createOrder({
+            clientPhone: req.body.clientPhone,
+            clientName: req.body.clientName,
+            productId: req.body.productId,
+            productName: req.body.productName,
+            quantity: req.body.quantity,
+            unitOfMeasure: req.body.unitOfMeasure,
+            deliveryType: req.body.deliveryType,
+            address: req.body.address,
+            city: req.body.city,
+            reference: req.body.reference,
+            paymentMethod: req.body.paymentMethod,
+            unitPrice: req.body.unitPrice,
+        });
+
+        res.status(result.success ? 201 : 400).json(result);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /whatsapp/:phone — Obtener órdenes de un cliente
+router.get('/whatsapp/:phone', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const orders = await WhatsAppOrdersService.getOrdersByPhone(req.params.phone);
+        res.json(orders);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /whatsapp — Listar todas las órdenes WhatsApp (con autenticación)
+router.get('/whatsapp', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const orders = await WhatsAppOrdersService.listOrders({
+            status: req.query.status as string | undefined,
+            clientPhone: req.query.clientPhone as string | undefined,
+        });
+        res.json({ orders, total: orders.length });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// =====================================================
+// Endpoints Originales
+// =====================================================
 
 // POST /:id/tracking-link — API key auth para integración CRM sin JWT
 router.post('/:id/tracking-link', async (req: Request, res: Response, next: NextFunction) => {

@@ -17,6 +17,9 @@ const PRODUCTOS_MOCK = [
 const CIUDADES = ['Guaca', 'Santiago', 'Providencia', 'Ñuñoa'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Cheque'];
 
+// API URL
+const API_BASE_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
+
 const FLUJO_PASOS = {
   cliente: {
     pregunta: '👤 ¿Cuál es tu nombre?',
@@ -96,7 +99,7 @@ export default function BotPedidosWhatsApp() {
   }, [datosFormulario]);
 
   // Procesar entrada del usuario
-  const procesarEntrada = useCallback((texto) => {
+  const procesarEntrada = useCallback(async (texto) => {
     setMensajes(prev => [...prev, { tipo: 'usuario', texto, hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) }]);
 
     let nuevosPasos = datosFormulario;
@@ -175,7 +178,51 @@ export default function BotPedidosWhatsApp() {
 
       case 'confirmacion':
         if (texto.toUpperCase() === 'SI') {
-          setMensajes(prev => [...prev, { tipo: 'sistema', texto: '✅ ¡PEDIDO CONFIRMADO!\n📦 Número: ORD-' + Math.random().toString(36).slice(2, 8).toUpperCase() + '\n\nTu pedido está en el sistema. Recibirás confirmación en breve. ¡Gracias!' }]);
+          setMensajes(prev => [...prev, { tipo: 'sistema', texto: '⏳ Procesando pedido...' }]);
+
+          // Enviar a API
+          try {
+            const prod = PRODUCTOS_MOCK.find(p => p.id === nuevosPasos.producto);
+            const response = await fetch(`${API_BASE_URL}/api/orders/whatsapp/create`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                clientPhone: '+56912345678',
+                clientName: nuevosPasos.cliente,
+                productId: nuevosPasos.producto,
+                productName: prod?.nombre,
+                quantity: nuevosPasos.cantidad,
+                unitOfMeasure: prod?.unidad,
+                deliveryType: nuevosPasos.despacho === '1' ? 'retiro' : 'entrega',
+                address: nuevosPasos.direccion,
+                city: CIUDADES[parseInt(nuevosPasos.ciudad) - 1],
+                reference: nuevosPasos.reference,
+                paymentMethod: METODOS_PAGO[parseInt(nuevosPasos.pago) - 1],
+                unitPrice: prod?.precio,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              setMensajes(prev => [...prev.slice(0, -1), {
+                tipo: 'sistema',
+                texto: '✅ ¡PEDIDO CONFIRMADO!\n📦 Número: ' + result.orderId.slice(0, 8).toUpperCase() + '\n\nTu pedido está en el sistema. ¡Gracias!'
+              }]);
+            } else {
+              setMensajes(prev => [...prev.slice(0, -1), {
+                tipo: 'error',
+                texto: '❌ Error al procesar: ' + (result.errors?.join(', ') || 'Error desconocido')
+              }]);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            setMensajes(prev => [...prev.slice(0, -1), {
+              tipo: 'error',
+              texto: '❌ Error de conexión. Por favor, intenta de nuevo.'
+            }]);
+          }
+
           pasoSiguiente = null;
         } else if (texto.toUpperCase() === 'NO') {
           setMensajes(prev => [...prev, { tipo: 'sistema', texto: '❌ Pedido cancelado. Si necesitas algo, estoy aquí para ayudarte. 😊' }]);
