@@ -22,6 +22,7 @@ import webhooksRoutes from './routes/webhooks.routes';
 import processesRoutes from './routes/processes.routes';
 import auditRoutes from './routes/audit.routes';
 import evidenceRoutes from './routes/evidence.routes';
+import billingRoutes from './routes/billing.routes';
 
 // Queues & Scheduler
 import { startScheduler } from './queues/scheduler';
@@ -108,6 +109,9 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/processes', processesRoutes);
 app.use('/api/audit', auditRoutes);
+
+// Billing Queue (cola de facturación)
+app.use('/api/billing', billingRoutes);
 
 // Evidence (sin autenticación JWT — acceso público por token)
 app.use('/api/evidence', evidenceRoutes);

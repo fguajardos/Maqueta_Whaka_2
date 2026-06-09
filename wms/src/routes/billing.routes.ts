@@ -7,9 +7,9 @@ const router = Router();
 /**
  * GET /api/billing/pending
  * Obtener pedidos pendientes de facturación
- * Admin only
+ * (Sin autenticación para demo)
  */
-router.get('/pending', authenticate, async (req: Request, res: Response) => {
+router.get('/pending', async (req: Request, res: Response) => {
   try {
     const { status, clientPhone } = req.query;
 
@@ -38,8 +38,9 @@ router.get('/pending', authenticate, async (req: Request, res: Response) => {
 /**
  * GET /api/billing/stats
  * Obtener estadísticas de facturación
+ * (Sin autenticación para demo)
  */
-router.get('/stats', authenticate, async (req: Request, res: Response) => {
+router.get('/stats', async (req: Request, res: Response) => {
   try {
     const result = await billingQueueService.getBillingStats();
 
@@ -59,8 +60,9 @@ router.get('/stats', authenticate, async (req: Request, res: Response) => {
 /**
  * GET /api/billing/:id
  * Obtener detalle de un pedido por facturar
+ * (Sin autenticación para demo)
  */
-router.get('/:id', authenticate, async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -110,10 +112,10 @@ router.get(
  * PATCH /api/billing/:id/invoice
  * Marcar pedido como facturado
  * Body: { bsaleDocumentId?, bsaleDocumentNumber? }
+ * (Sin autenticación para demo)
  */
 router.patch(
   '/:id/invoice',
-  authenticate,
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
@@ -143,8 +145,9 @@ router.patch(
  * PATCH /api/billing/:id/error
  * Marcar pedido como error de facturación
  * Body: { errorMessage: string }
+ * (Sin autenticación para demo)
  */
-router.patch('/:id/error', authenticate, async (req: Request, res: Response) => {
+router.patch('/:id/error', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { errorMessage } = req.body;
@@ -175,8 +178,9 @@ router.patch('/:id/error', authenticate, async (req: Request, res: Response) => 
  * PATCH /api/billing/:id/note
  * Agregar nota administrativa
  * Body: { note: string }
+ * (Sin autenticación para demo)
  */
-router.patch('/:id/note', authenticate, async (req: Request, res: Response) => {
+router.patch('/:id/note', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { note } = req.body;
@@ -207,10 +211,10 @@ router.patch('/:id/note', authenticate, async (req: Request, res: Response) => {
  * GET /api/billing/export/csv
  * Exportar cola de facturación a CSV
  * Query: ?status=pendiente (opcional)
+ * (Sin autenticación para demo)
  */
 router.get(
   '/export/csv',
-  authenticate,
   async (req: Request, res: Response) => {
     try {
       const { status } = req.query;
