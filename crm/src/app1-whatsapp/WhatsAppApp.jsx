@@ -522,54 +522,79 @@ export default function WhatsAppApp() {
     // Mostrar menu de selección
     if (modoApp === 'menu') {
         return (
-            <div className="h-screen flex flex-col items-center justify-center bg-[#111827] p-6">
-                <div className="max-w-2xl w-full">
-                    <div className="text-center mb-12">
-                        <div className="w-20 h-20 rounded-full bg-[#2D7D46]/20 flex items-center justify-center mx-auto mb-4">
-                            <Leaf className="w-10 h-10 text-[#2D7D46]" />
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#111827] p-4">
+                <div style={{ width: '100%', maxWidth: '500px' }}>
+                    <div className="text-center mb-10">
+                        <div style={{ width: '80px', height: '80px', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: 'rgba(45, 125, 70, 0.2)' }}>
+                            <Leaf style={{ width: '40px', height: '40px', color: '#2D7D46' }} />
                         </div>
-                        <h1 className="text-4xl font-bold text-white mb-2">WhakaChile</h1>
-                        <p className="text-white/60 text-lg">Sistema de Conversación y Pedidos</p>
+                        <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>WhakaChile</h1>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '16px' }}>Sistema de Conversación y Pedidos</p>
                     </div>
 
-                    <div className="space-y-4">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <button
                             onClick={() => setModoApp('chat')}
-                            className="w-full p-6 bg-gradient-to-r from-[#2D7D46] to-[#1A6B5A] rounded-lg hover:from-[#236335] hover:to-[#125047] transition-all transform hover:scale-105 text-left"
+                            style={{
+                                width: '100%',
+                                padding: '20px',
+                                background: 'linear-gradient(to right, #2D7D46, #1A6B5A)',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
+                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
                         >
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h2 className="text-white font-bold text-lg mb-2">💬 Chat Tradicional</h2>
-                                    <p className="text-[#A7F3D0] text-sm">Flujo completo de onboarding y compra digital (Etapa 0 y 1)</p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', margin: '0 0 8px 0' }}>💬 Chat Tradicional</h2>
+                                    <p style={{ color: '#A7F3D0', fontSize: '14px', margin: 0 }}>Flujo completo de onboarding y compra digital</p>
                                 </div>
-                                <ChevronRight className="w-6 h-6 text-white/60" />
+                                <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '4px' }} />
                             </div>
                         </button>
 
                         <button
                             onClick={() => setModoApp('bot')}
-                            className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all transform hover:scale-105 text-left"
+                            style={{
+                                width: '100%',
+                                padding: '20px',
+                                background: 'linear-gradient(to right, #2563eb, #1d4ed8)',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
+                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
                         >
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h2 className="text-white font-bold text-lg mb-2 flex items-center gap-2">
-                                        <Zap className="w-5 h-5" />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Zap style={{ width: '20px', height: '20px', flexShrink: 0 }} />
                                         Bot de Pedidos (NUEVO)
                                     </h2>
-                                    <p className="text-blue-100 text-sm">Sistema de pedidos estructurado sin errores (Cliente crea pedido paso a paso)</p>
+                                    <p style={{ color: '#bfdbfe', fontSize: '14px', margin: 0 }}>Sistema de pedidos estructurado sin errores</p>
                                 </div>
-                                <ChevronRight className="w-6 h-6 text-white/60" />
+                                <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '4px' }} />
                             </div>
                         </button>
 
-                        <Link to="/" className="w-full p-3 text-center text-white/60 hover:text-white transition-colors text-sm">
+                        <Link to="/" style={{ width: '100%', padding: '12px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', fontSize: '14px', transition: 'color 0.2s' }}
+                            onMouseEnter={e => e.target.style.color = 'white'}
+                            onMouseLeave={e => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
+                        >
                             ← Volver al inicio
                         </Link>
                     </div>
 
-                    <div className="mt-12 pt-8 border-t border-white/10">
-                        <p className="text-white/40 text-xs text-center">
-                            Para mañana: demostrar flujo del Bot de Pedidos que elimina errores manuales
+                    <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.25)', fontSize: '12px', textAlign: 'center', margin: 0 }}>
+                            Bot de Pedidos para eliminar errores manuales
                         </p>
                     </div>
                 </div>

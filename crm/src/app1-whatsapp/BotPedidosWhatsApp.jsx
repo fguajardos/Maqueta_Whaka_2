@@ -17,8 +17,18 @@ const PRODUCTOS_MOCK = [
 const CIUDADES = ['Guaca', 'Santiago', 'Providencia', 'Ñuñoa'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Cheque'];
 
-// API URL
+// API URL - conectar a WMS real
 const API_BASE_URL = import.meta.env.VITE_WMS_URL || 'http://localhost:3000';
+const API_ENDPOINT = `${API_BASE_URL}/api/orders/whatsapp/create`;
+
+// Datos de producto compartidos entre CRM y WMS
+const PRODUCTOS_COMPARTIDOS = {
+  'leche-desc': { nombre: 'Leche Descremada', unidad: 'litro', precio: 1200, stock: 50 },
+  'leche-entera': { nombre: 'Leche Entera', unidad: 'litro', precio: 1200, stock: 40 },
+  'yogurt': { nombre: 'Yogurt Natural', unidad: '500ml', precio: 800, stock: 60 },
+  'queso': { nombre: 'Queso', unidad: 'kg', precio: 8500, stock: 15 },
+  'mantequilla': { nombre: 'Mantequilla', unidad: 'kg', precio: 6500, stock: 25 },
+};
 
 const FLUJO_PASOS = {
   cliente: {
