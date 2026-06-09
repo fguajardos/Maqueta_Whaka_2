@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, MoreVertical, Smile, Send, ArrowLeft, Leaf, User, ChevronRight, CheckCheck, Clock, Zap } from 'lucide-react';
+import { Phone, MoreVertical, Smile, Send, ArrowLeft, Leaf, User, ChevronRight, CheckCheck, Clock, Zap, ChevronDown, FileText, BarChart3 } from 'lucide-react';
 import { PRODUCTOS, CATEGORIAS, CLIENTES, formatCLP } from '../data/mockData';
 import BotPedidosWhatsApp from './BotPedidosWhatsApp';
+import BillingQueuePanel from '../../components/BillingQueuePanel';
 
 /* ================================================================
    FLOW ENGINE — State machine driving both Etapa 0 and Etapa 1
@@ -372,8 +373,9 @@ const ETAPA1_STEPS = {
    ================================================================ */
 
 export default function WhatsAppApp() {
-    const [modoApp, setModoApp] = useState('menu'); // 'menu' | 'chat' | 'bot'
+    const [modoApp, setModoApp] = useState('menu'); // 'menu' | 'chat' | 'bot' | 'billing'
     const [session, setSession] = useState('lead'); // 'lead' | 'cliente'
+    const [wmsExpanded, setWmsExpanded] = useState(false); // Menú desplegable WMS
     const [messages, setMessages] = useState([]);
     const [currentStep, setCurrentStep] = useState(null);
     const [isTyping, setIsTyping] = useState(false);
@@ -523,81 +525,224 @@ export default function WhatsAppApp() {
     if (modoApp === 'menu') {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#111827] p-4">
-                <div style={{ width: '100%', maxWidth: '500px' }}>
+                <div style={{ width: '100%', maxWidth: '550px' }}>
                     <div className="text-center mb-10">
                         <div style={{ width: '80px', height: '80px', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: 'rgba(45, 125, 70, 0.2)' }}>
                             <Leaf style={{ width: '40px', height: '40px', color: '#2D7D46' }} />
                         </div>
                         <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>WhakaChile</h1>
-                        <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '16px' }}>Sistema de Conversación y Pedidos</p>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '16px' }}>CRM + WMS Integrado</p>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <button
-                            onClick={() => setModoApp('chat')}
-                            style={{
-                                width: '100%',
-                                padding: '20px',
-                                background: 'linear-gradient(to right, #2D7D46, #1A6B5A)',
-                                borderRadius: '8px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
-                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', margin: '0 0 8px 0' }}>💬 Chat Tradicional</h2>
-                                    <p style={{ color: '#A7F3D0', fontSize: '14px', margin: 0 }}>Flujo completo de onboarding y compra digital</p>
-                                </div>
-                                <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '4px' }} />
-                            </div>
-                        </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                        {/* Sección CRM */}
+                        <div>
+                            <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                                📱 CRM — Gestión de Clientes
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <button
+                                    onClick={() => setModoApp('chat')}
+                                    style={{
+                                        width: '100%',
+                                        padding: '16px',
+                                        background: 'linear-gradient(to right, #2D7D46, #1A6B5A)',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
+                                    onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '16px', margin: '0 0 4px 0' }}>💬 Chat Tradicional</h2>
+                                            <p style={{ color: '#A7F3D0', fontSize: '12px', margin: 0 }}>Flujo de onboarding y compra digital</p>
+                                        </div>
+                                        <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '2px', width: '18px', height: '18px' }} />
+                                    </div>
+                                </button>
 
-                        <button
-                            onClick={() => setModoApp('bot')}
-                            style={{
-                                width: '100%',
-                                padding: '20px',
-                                background: 'linear-gradient(to right, #2563eb, #1d4ed8)',
-                                borderRadius: '8px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
-                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <Zap style={{ width: '20px', height: '20px', flexShrink: 0 }} />
-                                        Bot de Pedidos (NUEVO)
+                                <button
+                                    onClick={() => setModoApp('bot')}
+                                    style={{
+                                        width: '100%',
+                                        padding: '16px',
+                                        background: 'linear-gradient(to right, #2563eb, #1d4ed8)',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
+                                    onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '16px', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Zap style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+                                                Bot de Pedidos
+                                            </h2>
+                                            <p style={{ color: '#bfdbfe', fontSize: '12px', margin: 0 }}>Pedidos estructurados sin errores</p>
+                                        </div>
+                                        <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '2px', width: '18px', height: '18px' }} />
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Sección WMS (Desplegable) */}
+                        <div>
+                            <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                                🏭 WMS — Gestión de Pedidos
+                            </p>
+                            <button
+                                onClick={() => setWmsExpanded(!wmsExpanded)}
+                                style={{
+                                    width: '100%',
+                                    padding: '16px',
+                                    background: wmsExpanded ? 'linear-gradient(to right, #d97706, #92400e)' : 'linear-gradient(to right, #d97706, #b45309)',
+                                    borderRadius: wmsExpanded ? '8px 8px 0 0' : '8px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={e => !wmsExpanded && (e.target.style.transform = 'scale(1.02)')}
+                                onMouseLeave={e => !wmsExpanded && (e.target.style.transform = 'scale(1)')}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                    <h2 style={{ color: 'white', fontWeight: 'bold', fontSize: '16px', margin: 0, flex: 1 }}>
+                                        ⚙️ Administración de Pedidos
                                     </h2>
-                                    <p style={{ color: '#bfdbfe', fontSize: '14px', margin: 0 }}>Sistema de pedidos estructurado sin errores</p>
+                                    <ChevronDown
+                                        style={{
+                                            color: 'rgba(255, 255, 255, 0.8)',
+                                            flexShrink: 0,
+                                            width: '20px',
+                                            height: '20px',
+                                            transform: wmsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                            transition: 'transform 0.3s'
+                                        }}
+                                    />
                                 </div>
-                                <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '4px' }} />
-                            </div>
-                        </button>
+                            </button>
 
-                        <Link to="/" style={{ width: '100%', padding: '12px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', fontSize: '14px', transition: 'color 0.2s' }}
-                            onMouseEnter={e => e.target.style.color = 'white'}
-                            onMouseLeave={e => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
-                        >
-                            ← Volver al inicio
-                        </Link>
+                            {wmsExpanded && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                                    <button
+                                        onClick={() => setModoApp('billing')}
+                                        style={{
+                                            width: '100%',
+                                            padding: '14px 16px',
+                                            background: 'rgba(217, 119, 6, 0.5)',
+                                            borderBottom: '1px solid rgba(217, 119, 6, 0.3)',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => e.target.style.background = 'rgba(217, 119, 6, 0.7)'}
+                                        onMouseLeave={e => e.target.style.background = 'rgba(217, 119, 6, 0.5)'}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <FileText style={{ color: '#fbbf24', width: '18px', height: '18px', flexShrink: 0 }} />
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ color: '#fcd34d', fontWeight: '600', fontSize: '14px', margin: '0 0 2px 0' }}>Pendiente por Facturar</p>
+                                                <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', margin: 0 }}>Cola de facturación (sin BSale)</p>
+                                            </div>
+                                            <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.5)', flexShrink: 0, width: '16px', height: '16px' }} />
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        onClick={() => alert('Dashboard de Pedidos (Próximamente)')}
+                                        style={{
+                                            width: '100%',
+                                            padding: '14px 16px',
+                                            background: 'rgba(217, 119, 6, 0.5)',
+                                            borderBottom: '1px solid rgba(217, 119, 6, 0.3)',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            transition: 'all 0.2s',
+                                            opacity: '0.6'
+                                        }}
+                                        onMouseEnter={e => e.target.style.background = 'rgba(217, 119, 6, 0.7)'}
+                                        onMouseLeave={e => e.target.style.background = 'rgba(217, 119, 6, 0.5)'}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <BarChart3 style={{ color: '#fbbf24', width: '18px', height: '18px', flexShrink: 0 }} />
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ color: '#fcd34d', fontWeight: '600', fontSize: '14px', margin: '0 0 2px 0' }}>Dashboard de Pedidos</p>
+                                                <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', margin: 0 }}>Estadísticas y reportes</p>
+                                            </div>
+                                            <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.5)', flexShrink: 0, width: '16px', height: '16px' }} />
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        onClick={() => setWmsExpanded(false)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px 16px',
+                                            background: 'rgba(217, 119, 6, 0.3)',
+                                            borderRadius: '0 0 8px 8px',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            textAlign: 'center',
+                                            color: 'rgba(255, 255, 255, 0.7)',
+                                            fontSize: '12px',
+                                            fontWeight: '500',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => e.target.style.background = 'rgba(217, 119, 6, 0.5)'}
+                                        onMouseLeave={e => e.target.style.background = 'rgba(217, 119, 6, 0.3)'}
+                                    >
+                                        Contraer menú
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                        <p style={{ color: 'rgba(255, 255, 255, 0.25)', fontSize: '12px', textAlign: 'center', margin: 0 }}>
-                            Bot de Pedidos para eliminar errores manuales
+                    <Link to="/" style={{ width: '100%', padding: '12px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', fontSize: '14px', transition: 'color 0.2s', display: 'block' }}
+                        onMouseEnter={e => e.style.color = 'white'}
+                        onMouseLeave={e => e.style.color = 'rgba(255, 255, 255, 0.6)'}
+                    >
+                        ← Volver al inicio
+                    </Link>
+
+                    <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.25)', fontSize: '12px', textAlign: 'center', margin: '0 0 8px 0' }}>
+                            Sistema integrado de CRM + WMS
+                        </p>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '10px', textAlign: 'center', margin: 0 }}>
+                            Bot de Pedidos | Chat Comercial | Cola de Facturación
                         </p>
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    // Mostrar Panel de Facturación
+    if (modoApp === 'billing') {
+        return (
+            <div className="h-screen flex flex-col">
+                <div className="h-12 bg-gradient-to-r from-amber-600 to-amber-700 flex items-center px-4">
+                    <button
+                        onClick={() => setModoApp('menu')}
+                        className="text-white hover:text-amber-100 transition-colors flex items-center gap-2"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span className="text-sm">Volver al menú</span>
+                    </button>
+                </div>
+                <BillingQueuePanel />
             </div>
         );
     }
