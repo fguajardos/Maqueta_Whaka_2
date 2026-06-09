@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { logger } from '../utils/logger';
 import { v4 as uuid } from 'uuid';
+import { billingQueueService } from './billingQueue.service';
 
 export interface CreateWhatsAppOrderDTO {
   clientPhone: string;
@@ -90,6 +91,40 @@ export class WhatsAppOrdersService {
       logger.info(
         `[WhatsApp] Orden creada: ${whatsappOrder.id} (${errors.length} errores)`
       );
+
+      // Si la orden es exitosa, agregar a cola de facturación
+      if (errors.length === 0) {
+        const deliveryFee = data.deliveryType === 'entrega' ? 0 : 0; // Puede ser dinámico
+        const totalAmount = subtotal + deliveryFee;
+
+        const billingResult = await billingQueueService.createBillingEntry({
+          whatsappOrderId: whatsappOrder.id,
+          clientPhone: data.clientPhone,
+          clientName: data.clientName,
+          deliveryAddress: data.address || 'No especificada',
+          deliveryCity: data.city || 'No especificada',
+          productName: data.productName,
+          productSKU: data.productId,
+          quantity: data.quantity,
+          unitOfMeasure: data.unitOfMeasure,
+          unitPrice: data.unitPrice || 1200,
+          subtotal,
+          deliveryType: data.deliveryType === 'entrega' ? 'entrega' : 'retiro',
+          deliveryFee,
+          paymentMethod: data.paymentMethod,
+          totalAmount,
+        });
+
+        if (!billingResult.success) {
+          logger.warn(
+            `[WhatsApp] Advertencia: No se pudo agregar orden a cola de facturación: ${billingResult.error}`
+          );
+        } else {
+          logger.info(
+            `[WhatsApp] Orden agregada a cola de facturación: ${billingResult.billingId}`
+          );
+        }
+      }
 
       return {
         success: errors.length === 0,

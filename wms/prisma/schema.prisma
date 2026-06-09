@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -178,7 +178,7 @@ model WhatsAppOrder {
   paymentMethod       String    @map("payment_method")
 
   status              String    @default("confirmado")
-  validationErrors    Json      @default("[]") @map("validation_errors")
+  validationErrors    String    @default("[]") @map("validation_errors")
 
   orderId             String?   @map("order_id")
 
@@ -197,7 +197,7 @@ model WhatsAppSession {
   clientPhone       String    @unique @map("client_phone")
 
   currentStep       String    @map("current_step")
-  orderData         Json      @default("{}")
+  orderData         String    @default("{}")
 
   startedAt         DateTime  @default(now()) @map("started_at")
   lastActivityAt    DateTime  @updatedAt @map("last_activity_at")
@@ -206,4 +206,70 @@ model WhatsAppSession {
   @@index([clientPhone])
   @@index([lastActivityAt])
   @@map("whatsapp_sessions")
+}
+
+// ============================================
+// Cola de Facturación (Independent de BSale API)
+// Para capturar datos limpios incluso sin BSale
+// ============================================
+model BillingQueue {
+  id                  String    @id @default(cuid())
+
+  // Referencia a orden WhatsApp
+  whatsappOrderId     String    @map("whatsapp_order_id")
+
+  // Datos del cliente
+  clientPhone         String    @map("client_phone")
+  clientName          String    @map("client_name")
+  clientRut           String?   @map("client_rut")
+  clientEmail         String?   @map("client_email")
+
+  // Datos de dirección
+  deliveryAddress     String    @map("delivery_address")
+  deliveryCity        String    @map("delivery_city")
+  deliveryZone        String?   @map("delivery_zone")
+
+  // Detalle de producto (puede ser múltiples items)
+  productName         String    @map("product_name")
+  productSKU          String?   @map("product_sku")
+  quantity            Float
+  unitOfMeasure       String    @map("unit_of_measure")
+  unitPrice           Float     @map("unit_price")
+  subtotal            Float
+
+  // Despacho
+  deliveryType        String    @map("delivery_type") // retiro, entrega
+  deliveryFee         Float     @default(0) @map("delivery_fee")
+
+  // Pago
+  paymentMethod       String    @map("payment_method")
+  totalAmount         Float     @map("total_amount") // subtotal + delivery
+
+  // Estados de facturación
+  status              String    @default("pendiente") @map("status")
+  // pendiente → procesando → facturado → error
+
+  // Información de BSale (si se logró crear)
+  bsaleDocumentId     String?   @map("bsale_document_id")
+  bsaleDocumentNumber String?   @map("bsale_document_number")
+  bsaleInvoiceDate    DateTime? @map("bsale_invoice_date")
+
+  // Información de errores
+  errorMessage        String?   @map("error_message")
+  errorCount          Int       @default(0) @map("error_count")
+  lastErrorAt         DateTime? @map("last_error_at")
+
+  // Notas administrativas
+  adminNotes          String?   @map("admin_notes")
+
+  // Auditoría
+  createdAt           DateTime  @default(now()) @map("created_at")
+  processedAt         DateTime? @map("processed_at")
+  facturadoAt         DateTime? @map("facturado_at")
+
+  @@index([clientPhone])
+  @@index([status])
+  @@index([createdAt])
+  @@index([bsaleDocumentId])
+  @@map("billing_queue")
 }

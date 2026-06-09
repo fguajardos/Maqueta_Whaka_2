@@ -1,0 +1,128 @@
+🚀 PASOS PARA MAÑANA (9 de Junio) — ANTES DE LA REUNIÓN
+
+===============================================
+1. VERIFICAR QUE TODO ESTÉ LISTO EN RENDER (5 min)
+===============================================
+
+Abrir en navegador:
+✅ CRM:       https://whakachile-crm.onrender.com
+✅ WMS API:   https://whakachile-wms.onrender.com/api/orders/whatsapp (debería dar 404 sin POST)
+✅ Bot:       https://whakachile-crm.onrender.com/whatsapp (debería cargar)
+✅ Dashboard: https://whakachile-crm.onrender.com/pedidos-whatsapp
+
+Si algo NO carga:
+  → Render tarda 5-10 min en buildear. Esperar y refrescar.
+  → Si sigue fallando, revisar logs en https://dashboard.render.com
+
+
+===============================================
+2. TEST RÁPIDO DEL FLUJO (3 min)
+===============================================
+
+1. Abrir bot en: https://whakachile-crm.onrender.com/whatsapp
+2. Enviar esto en el chat:
+   - Nombre: "Cliente Test"
+   - Producto: 1 (Leche Descremada)
+   - Cantidad: 5
+   - Despacho: 2 (Entrega)
+   - Dirección: "Calle 5 número 123, depto 402, referencia: cerca del cine"
+   - Ciudad: 1 (Guaca)
+   - Pago: 2 (Transferencia)
+   - Confirmación: SI
+
+ESPERADO:
+✅ El bot debe responder con cada paso
+✅ Última respuesta: "✅ ¡PEDIDO CONFIRMADO! 📦 Número: [ID]"
+✅ Luego ir al dashboard y ver la orden ahí
+
+
+===============================================
+3. SHOW THE RESULTS IN DASHBOARD (2 min)
+===============================================
+
+1. Ir a: https://whakachile-crm.onrender.com/pedidos-whatsapp
+2. Debe haber al menos 1 orden visible en la tabla
+3. Click en la orden para ver detalles
+4. Mostrar al cliente:
+   - Cliente: Cliente Test
+   - Producto: Leche Descremada
+   - Cantidad: 5 litros
+   - Subtotal: $6.000
+   - Estado: confirmado
+   - Hora: (createdAt timestamp)
+
+
+===============================================
+4. VALIDACIONES A DEMOSTRAR (1-2 min)
+===============================================
+
+Volver al bot y probar esto:
+
+❌ Cantidad inválida:
+   - Después de seleccionar producto, enviar: 100
+   - ESPERADO: "Error: Stock insuficiente. Máximo disponible: 50"
+
+❌ Nombre inválido:
+   - Reiniciar bot, enviar: "J"
+   - ESPERADO: "Error: El nombre debe tener al menos 2 caracteres"
+
+❌ Dirección inválida:
+   - En paso dirección, enviar: "Calle 5"
+   - ESPERADO: "Error: Dirección muy corta. Incluye calle, número y referencias"
+
+
+===============================================
+5. ARCHIVOS IMPORTANTES PARA LLEVAR
+===============================================
+
+DEMO_READINESS.md      → Referencia completa de lo que está listo
+Este archivo           → Pasos rápidos para mañana
+CHANGELOG.md           → Últimos cambios (si lo hay)
+
+
+===============================================
+6. NOTAS PARA EL CLIENTE
+===============================================
+
+Mensaje clave:
+"El sistema valida TODOS los datos en tiempo real contra la base de datos.
+Si hay error (stock insuficiente, dirección inválida, etc.), el cliente lo sabe
+INMEDIATAMENTE sin necesidad de que un humano revise."
+
+Esto elimina:
+✅ Errores de tipeo en datos
+✅ Órdenes con productos agotados
+✅ Entregas a direcciones incompletas
+✅ Tiempos de revisión manual
+
+
+===============================================
+7. SI ALGO FALLA
+===============================================
+
+Si el bot no responde:
+→ Abrir DevTools (F12) → Console
+→ Buscar error rojo que diga "Failed to fetch"
+→ URL debe ser: https://whakachile-wms.onrender.com/api/orders/whatsapp/create
+
+Si el dashboard está vacío:
+→ Hacer F5 (refresh)
+→ Verificar en Network tab que la API devuelva datos
+
+Si Render está caído:
+→ Decirle al cliente: "Render a veces tarda en buildear cambios"
+→ Mostrar el código en GitHub como proof-of-concept
+
+
+===============================================
+8. DESPUÉS DE LA REUNIÓN
+===============================================
+
+Usuario dice: "Hay que mejorar X, Y, Z"
+→ GUARDAR LA LISTA exacta de mejoras
+→ Crear issues en GitHub
+→ Actualizar DEMO_READINESS.md con feedback
+→ Pasar a Fase 2
+
+
+¡BUENA SUERTE! 🍀
