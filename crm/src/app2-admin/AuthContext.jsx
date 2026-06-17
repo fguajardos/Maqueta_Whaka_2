@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -21,6 +21,29 @@ function clearSession() {
     localStorage.removeItem(STORAGE_KEY);
 }
 
+// Login al WMS con reintentos — sobrevive el "cold start" de Render free
+// (el backend puede tardar o devolver 502 mientras despierta).
+async function wmsLogin(email, password, intentos = 4) {
+    if (!email || !password) return { token: null, user: null };
+    for (let i = 0; i < intentos; i++) {
+        try {
+            const res = await fetch(`${WMS_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                return { token: data.token || null, user: data.user || null };
+            }
+        } catch (_) {
+            // red / cold start — reintentar
+        }
+        if (i < intentos - 1) await new Promise(r => setTimeout(r, 2500));
+    }
+    return { token: null, user: null };
+}
+
 export function AuthProvider({ children }) {
     const saved = loadSession();
     const [user, setUser] = useState(saved.user || null);
@@ -29,29 +52,26 @@ export function AuthProvider({ children }) {
 
     const login = useCallback(async (userData) => {
         setUser(userData);
-
-        let token = null;
-        let wUser = null;
-
-        // Auto-login al WMS con las mismas credenciales
-        try {
-            const res = await fetch(`${WMS_URL}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userData.email, password: userData.password }),
-            });
-            if (res.ok) {
-                const data = await res.json();
-                token = data.token;
-                wUser = data.user;
-                setWmsToken(token);
-                setWmsUser(wUser);
-            }
-        } catch (_) {
-            // WMS no disponible — continuar sin token WMS
-        }
-
+        const { token, user: wUser } = await wmsLogin(userData.email, userData.password);
+        setWmsToken(token);
+        setWmsUser(wUser);
         saveSession(userData, token, wUser);
+    }, []);
+
+    // Si hay sesión pero falta el token del WMS (ej. el login ocurrió durante un
+    // cold start), recuperarlo al cargar. Las páginas re-cargan sus datos solas
+    // al llegar el token, porque sus fetch dependen de wmsToken.
+    useEffect(() => {
+        if (user && !wmsToken && user.email && user.password) {
+            wmsLogin(user.email, user.password).then(({ token, user: wUser }) => {
+                if (token) {
+                    setWmsToken(token);
+                    setWmsUser(wUser);
+                    saveSession(user, token, wUser);
+                }
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const logout = useCallback(() => {
