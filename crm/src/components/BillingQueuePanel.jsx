@@ -364,10 +364,10 @@ export default function BillingQueuePanel() {
 
       {/* Modal Detalle */}
       {showModal && selectedBilling && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '16px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.35)', maxWidth: '42rem', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             {/* Header Modal */}
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
+            <div style={{ position: 'sticky', top: 0, background: 'linear-gradient(to right, #2563eb, #1d4ed8)', color: '#fff', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 1 }}>
               <h2 className="text-xl font-bold">Detalle de Facturación</h2>
               <button
                 onClick={() => {
@@ -381,13 +381,13 @@ export default function BillingQueuePanel() {
             </div>
 
             {/* Contenido */}
-            <div className="p-6 space-y-6">
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Cliente */}
               <div>
                 <h3 className="font-semibold text-gray-800 mb-3">
                   📱 Información del Cliente
                 </h3>
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
                   <div>
                     <p className="text-sm text-gray-600">Nombre</p>
                     <p className="font-medium">{selectedBilling.clientName}</p>
@@ -416,7 +416,7 @@ export default function BillingQueuePanel() {
                 <h3 className="font-semibold text-gray-800 mb-3">
                   🛒 Detalle del Producto
                 </h3>
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
                   <div>
                     <p className="text-sm text-gray-600">Producto</p>
                     <p className="font-medium">{selectedBilling.productName}</p>
@@ -453,8 +453,8 @@ export default function BillingQueuePanel() {
                 <h3 className="font-semibold text-gray-800 mb-3">
                   📍 Información de Entrega
                 </h3>
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                  <div className="col-span-2">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
+                  <div style={{ gridColumn: '1 / -1' }}>
                     <p className="text-sm text-gray-600">Dirección</p>
                     <p className="font-medium">
                       {selectedBilling.deliveryAddress}
@@ -490,7 +490,7 @@ export default function BillingQueuePanel() {
                 <h3 className="font-semibold text-gray-800 mb-3">
                   💳 Información de Pago
                 </h3>
-                <div className="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#eff6ff', padding: '16px', borderRadius: '8px', border: '2px solid #bfdbfe' }}>
                   <div>
                     <p className="text-sm text-gray-600">Método Pago</p>
                     <p className="font-medium">
@@ -508,7 +508,7 @@ export default function BillingQueuePanel() {
 
               {/* Acciones */}
               {selectedBilling.status === 'pendiente' && (
-                <div className="space-y-4">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Número de Documento BSale (opcional)
@@ -521,7 +521,7 @@ export default function BillingQueuePanel() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                       onClick={() =>
                         markAsInvoiced(selectedBilling.id, note)
@@ -579,7 +579,7 @@ export default function BillingQueuePanel() {
             </div>
 
             {/* Footer Modal */}
-            <div className="border-t p-4 bg-gray-50 flex justify-end">
+            <div style={{ borderTop: '1px solid #e5e7eb', padding: '16px', background: '#f9fafb', display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => {
                   setShowModal(false);
