@@ -1,0 +1,25 @@
+name: keep-alive
+
+# Mantiene despierto el backend WMS en Render (plan free) para evitar el "cold start".
+# Corre en la nube de GitHub Actions — NO necesita tu equipo encendido.
+# En repos PÚBLICOS, GitHub Actions es gratis e ilimitado.
+#
+# Si Render le asigna otro nombre al backend, define la variable de repo WMS_URL
+# en Settings → Secrets and variables → Actions → Variables (con la URL real).
+# Si no, usa el valor por defecto de abajo.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # cada 10 minutos (hora UTC)
+  workflow_dispatch: {}        # permite ejecutarlo manualmente desde la pestaña Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health del backend
+        run: |
+          URL="${{ vars.WMS_URL || 'https://whakachile-wms.onrender.com' }}"
+          echo "→ Pinging $URL/health"
+          curl -fsS -m 60 -o /dev/null -w "OK · HTTP %{http_code} · %{time_total}s\n" "$URL/health" \
+            || echo "⚠️ Ping falló (el backend puede estar despertando o aún no desplegado)"
