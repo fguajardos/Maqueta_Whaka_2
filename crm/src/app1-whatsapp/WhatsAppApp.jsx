@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Phone, MoreVertical, Smile, Send, ArrowLeft, Leaf, User, ChevronRight, CheckCheck, Clock, Zap, ChevronDown, FileText, BarChart3 } from 'lucide-react';
 import { PRODUCTOS, CATEGORIAS, CLIENTES, formatCLP } from '../data/mockData';
 import BotPedidosWhatsApp from './BotPedidosWhatsApp';
-import BillingQueuePanel from '../../components/BillingQueuePanel';
+import BillingQueuePanel from '../components/BillingQueuePanel';
 
 /* ================================================================
    FLOW ENGINE — State machine driving both Etapa 0 and Etapa 1
@@ -541,6 +541,8 @@ export default function WhatsAppApp() {
                                 📱 CRM — Gestión de Clientes
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {/* Chat Tradicional — OCULTO: flujo mock sin backend. El escalado a
+                                    ejecutivo ahora vive dentro del Bot de Pedidos. Reactivar/fusionar a futuro.
                                 <button
                                     onClick={() => setModoApp('chat')}
                                     style={{
@@ -564,6 +566,7 @@ export default function WhatsAppApp() {
                                         <ChevronRight style={{ color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0, marginTop: '2px', width: '18px', height: '18px' }} />
                                     </div>
                                 </button>
+                                */}
 
                                 <button
                                     onClick={() => setModoApp('bot')}
@@ -721,7 +724,7 @@ export default function WhatsAppApp() {
                             Sistema integrado de CRM + WMS
                         </p>
                         <p style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '10px', textAlign: 'center', margin: 0 }}>
-                            Bot de Pedidos | Chat Comercial | Cola de Facturación
+                            Bot de Pedidos | Cola de Facturación
                         </p>
                     </div>
                 </div>

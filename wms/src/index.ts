@@ -23,9 +23,19 @@ import processesRoutes from './routes/processes.routes';
 import auditRoutes from './routes/audit.routes';
 import evidenceRoutes from './routes/evidence.routes';
 import billingRoutes from './routes/billing.routes';
+import whatsappLeadsRoutes from './routes/whatsapp-leads.routes';
+import whatsappCatalogRoutes from './routes/whatsapp-catalog.routes';
+import whatsappOrdersRoutes from './routes/whatsapp-orders.routes';
+import adminLeadsRoutes from './routes/admin-leads.routes';
+import adminClientesRoutes from './routes/admin-clientes.routes';
+import adminWmsRoutes from './routes/admin-wms.routes';
 
 // Queues & Scheduler
 import { startScheduler } from './queues/scheduler';
+import { initializeJobOrchestrator } from './queues/jobOrchestrator';
+import leadApprovalWorker from './queues/workers/leadApproval.worker';
+import leadRejectionWorker from './queues/workers/leadRejection.worker';
+import leadExpirationWorker from './queues/workers/leadExpiration.worker';
 
 const app = express();
 
@@ -113,6 +123,20 @@ app.use('/api/audit', auditRoutes);
 // Billing Queue (cola de facturación)
 app.use('/api/billing', billingRoutes);
 
+// WhatsApp Bot Routes (sin autenticación para MVP)
+app.use('/api/whatsapp/leads', whatsappLeadsRoutes);
+app.use('/api/whatsapp/catalog', whatsappCatalogRoutes);
+app.use('/api/whatsapp/orders', whatsappOrdersRoutes);
+
+// Admin Leads Management (con autenticación)
+app.use('/api/admin/leads', adminLeadsRoutes);
+
+// Admin Clientes (con autenticación) — lee prisma.cliente (clientes del flujo WhatsApp)
+app.use('/api/admin/clientes', adminClientesRoutes);
+
+// Admin WMS (con autenticación) — stock y dashboard operativo
+app.use('/api/admin/wms', adminWmsRoutes);
+
 // Evidence (sin autenticación JWT — acceso público por token)
 app.use('/api/evidence', evidenceRoutes);
 
@@ -150,6 +174,14 @@ async function start() {
             await startScheduler();
         } catch (err: any) {
             logger.warn('Scheduler could not start (Redis may not be available):', err.message);
+        }
+
+        // Initialize Job Orchestrator (BullMQ workers)
+        try {
+            await initializeJobOrchestrator();
+            logger.info('✅ Job Orchestrator initialized');
+        } catch (err: any) {
+            logger.warn('Job Orchestrator could not start (Redis may not be available):', err.message);
         }
 
     } catch (err) {

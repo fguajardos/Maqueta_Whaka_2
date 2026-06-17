@@ -6,7 +6,10 @@ import AdminLayout from './AdminLayout';
 import DashboardPage from './pages/DashboardPage';
 import LeadsPage from './pages/LeadsPage';
 import ClientesPage from './pages/ClientesPage';
-import WmsPage from './pages/WmsPage';
+import WmsDashboardPage from './pages/WmsDashboardPage';
+import WmsStockPage from './pages/WmsStockPage';
+import WmsPedidosPage from './pages/WmsPedidosPage';
+import WmsDespachoPage from './pages/WmsDespachoPage';
 import CatalogoPage from './pages/CatalogoPage';
 import ReportesPage from './pages/ReportesPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
@@ -53,10 +56,10 @@ function AdminRoutes() {
             <Route path="/leads" element={<ProtectedRoute module="leads"><LeadsPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute module="clientes"><ClientesPage /></ProtectedRoute>} />
             <Route path="/wms" element={<WmsRedirect />} />
-            <Route path="/wms/dashboard" element={<ProtectedRoute module="wms_dashboard"><WmsPage /></ProtectedRoute>} />
-            <Route path="/wms/stock" element={<ProtectedRoute module="wms_stock"><WmsPage /></ProtectedRoute>} />
-            <Route path="/wms/pedidos" element={<ProtectedRoute module="wms_pedidos"><WmsPage /></ProtectedRoute>} />
-            <Route path="/wms/despacho" element={<ProtectedRoute module="wms_despacho"><WmsPage /></ProtectedRoute>} />
+            <Route path="/wms/dashboard" element={<ProtectedRoute module="wms_dashboard"><WmsDashboardPage /></ProtectedRoute>} />
+            <Route path="/wms/stock" element={<ProtectedRoute module="wms_stock"><WmsStockPage /></ProtectedRoute>} />
+            <Route path="/wms/pedidos" element={<ProtectedRoute module="wms_pedidos"><WmsPedidosPage /></ProtectedRoute>} />
+            <Route path="/wms/despacho" element={<ProtectedRoute module="wms_despacho"><WmsDespachoPage /></ProtectedRoute>} />
             <Route path="/catalogo" element={<ProtectedRoute module="catalogo"><CatalogoPage /></ProtectedRoute>} />
             <Route path="/reportes" element={<ProtectedRoute module="reportes"><ReportesPage /></ProtectedRoute>} />
             <Route path="/pedidos-whatsapp" element={<ProtectedRoute module="dashboard"><PedidosWhatsAppPage /></ProtectedRoute>} />

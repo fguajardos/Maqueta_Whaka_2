@@ -7,7 +7,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "tsx watch --ignore ./public --ignore ./uploads src/index.ts",
+    "dev": "nodemon",
+    "dev:tsx": "tsx watch --ignore ./public --ignore ./uploads src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:generate": "prisma generate",
@@ -43,6 +44,7 @@
     "@types/node": "^22.13.5",
     "@types/node-cron": "^3.0.11",
     "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.14",
     "prisma": "^6.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",

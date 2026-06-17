@@ -146,6 +146,220 @@ async function main() {
     console.log('✅ Product mappings seeded');
 
     // =============================================
+    // NUEVOS MODELOS - Productos y Formatos
+    // =============================================
+    const productos = await Promise.all([
+        prisma.producto.upsert({
+            where: { sku: 'LECHE-DESC-001' },
+            update: {},
+            create: {
+                nombre: 'Leche Descremada',
+                sku: 'LECHE-DESC-001',
+                categoria: 'Lácteos',
+                precioBase: 1200,
+                stockTotal: 500,
+                activo: true,
+            },
+        }),
+        prisma.producto.upsert({
+            where: { sku: 'LECHE-ENTERA-001' },
+            update: {},
+            create: {
+                nombre: 'Leche Entera',
+                sku: 'LECHE-ENTERA-001',
+                categoria: 'Lácteos',
+                precioBase: 1400,
+                stockTotal: 300,
+                activo: true,
+            },
+        }),
+        prisma.producto.upsert({
+            where: { sku: 'YOGURT-001' },
+            update: {},
+            create: {
+                nombre: 'Yogurt Natural',
+                sku: 'YOGURT-001',
+                categoria: 'Lácteos',
+                precioBase: 800,
+                stockTotal: 200,
+                activo: true,
+            },
+        }),
+        prisma.producto.upsert({
+            where: { sku: 'QUESO-001' },
+            update: {},
+            create: {
+                nombre: 'Queso Fresco',
+                sku: 'QUESO-001',
+                categoria: 'Lácteos',
+                precioBase: 8500,
+                stockTotal: 50,
+                activo: true,
+            },
+        }),
+    ]);
+    console.log(`✅ ${productos.length} Productos creados`);
+
+    // Crear formatos
+    await Promise.all([
+        // Leche Descremada
+        prisma.productoFormato.upsert({
+            where: {
+                productoId_formato: {
+                    productoId: productos[0].id,
+                    formato: 'litro',
+                },
+            },
+            update: {},
+            create: {
+                productoId: productos[0].id,
+                formato: 'litro',
+                unidadMedida: 'L',
+                precio: 1200,
+                stock: 500,
+                cantidadBase: 1,
+                minStock: 50,
+            },
+        }),
+        prisma.productoFormato.upsert({
+            where: {
+                productoId_formato: {
+                    productoId: productos[0].id,
+                    formato: 'botella 500ml',
+                },
+            },
+            update: {},
+            create: {
+                productoId: productos[0].id,
+                formato: 'botella 500ml',
+                unidadMedida: 'unidad',
+                precio: 600,
+                stock: 800,
+                cantidadBase: 0.5,
+                minStock: 100,
+            },
+        }),
+        // Leche Entera
+        prisma.productoFormato.upsert({
+            where: {
+                productoId_formato: {
+                    productoId: productos[1].id,
+                    formato: 'litro',
+                },
+            },
+            update: {},
+            create: {
+                productoId: productos[1].id,
+                formato: 'litro',
+                unidadMedida: 'L',
+                precio: 1400,
+                stock: 300,
+                cantidadBase: 1,
+                minStock: 50,
+            },
+        }),
+        // Yogurt
+        prisma.productoFormato.upsert({
+            where: {
+                productoId_formato: {
+                    productoId: productos[2].id,
+                    formato: 'vaso 500ml',
+                },
+            },
+            update: {},
+            create: {
+                productoId: productos[2].id,
+                formato: 'vaso 500ml',
+                unidadMedida: 'unidad',
+                precio: 800,
+                stock: 200,
+                cantidadBase: 0.5,
+                minStock: 20,
+            },
+        }),
+        // Queso
+        prisma.productoFormato.upsert({
+            where: {
+                productoId_formato: {
+                    productoId: productos[3].id,
+                    formato: 'kg',
+                },
+            },
+            update: {},
+            create: {
+                productoId: productos[3].id,
+                formato: 'kg',
+                unidadMedida: 'kg',
+                precio: 8500,
+                stock: 50,
+                cantidadBase: 1,
+                minStock: 5,
+            },
+        }),
+    ]);
+    console.log('✅ ProductoFormatos creados');
+
+    // =============================================
+    // Cliente de prueba
+    // =============================================
+    await (prisma.cliente as any)?.upsert({
+        where: { rut: '12.345.678-9' },
+        update: {},
+        create: {
+            rut: '12.345.678-9',
+            razonSocial: 'Café Test SpA',
+            tipoCliente: 'Empresa',
+            tipoNegocio: 'Cafetería',
+            contactName: 'Juan Test',
+            phone: '+56912345678',
+            email: 'juan@cafetest.cl',
+            estado: 'activo',
+            condicionPago: 'Crédito 30 días',
+            limiteCredito: 500000,
+            pedidoMinimo: 50000,
+        },
+    });
+    console.log('✅ Cliente de prueba creado');
+
+    // =============================================
+    // Lead de prueba
+    // =============================================
+    const lead = await prisma.lead.upsert({
+        where: { rut: '99.999.999-9' },
+        update: {},
+        create: {
+            rut: '99.999.999-9',
+            razonSocial: 'Nueva Empresa Test',
+            tipoNegocio: 'Restaurante',
+            tipoCliente: 'Empresa',
+            contactName: 'Carlos Nuevo',
+            phone: '+56987654321',
+            email: 'carlos@nuevaempresa.cl',
+            status: 'pendiente',
+            expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
+        },
+    });
+    console.log('✅ Lead de prueba creado');
+
+    // =============================================
+    // Notificaciones de ejemplo
+    // =============================================
+    await prisma.notification.upsert({
+        where: { id: 'notif-test-1' },
+        update: {},
+        create: {
+            id: 'notif-test-1',
+            type: 'lead_pendiente',
+            title: 'Nuevo lead en espera',
+            message: 'Nueva empresa solicitó registro',
+            entityType: 'Lead',
+            entityId: lead.id,
+            recipientEmail: 'admin@whakachile.com',
+        },
+    });
+    console.log('✅ Notificaciones creadas');
+
+    // =============================================
     // Pedidos de prueba (con items para stock)
     // =============================================
     const testOrders = [

@@ -38,4 +38,16 @@ export function getRedis(): Redis | null {
     }
 }
 
-export default getRedis();
+// Conexión que usan las colas/workers de BullMQ.
+// Exportamos OPCIONES (no una instancia) con reintento acotado para que, si Redis
+// no está disponible, no se reintente indefinidamente ni se bloquee el proceso.
+// En producción (Redis configurado vía host/port) se conecta normalmente.
+const bullConnection = {
+    host: env.REDIS_HOST,
+    port: env.REDIS_PORT,
+    password: env.REDIS_PASSWORD,
+    maxRetriesPerRequest: null as null, // requerido por BullMQ
+    retryStrategy: (times: number) => (times > 5 ? null : Math.min(times * 200, 2000)),
+};
+
+export default bullConnection;

@@ -59,7 +59,7 @@ export class WhatsAppOrdersService {
           quantity: data.quantity,
           unitOfMeasure: data.unitOfMeasure,
           subtotal,
-          deliveryType: data.deliveryType === '2' ? 'entrega' : 'retiro',
+          deliveryType: (data.deliveryType === '2' || data.deliveryType === 'entrega') ? 'entrega' : 'retiro',
           address: data.address,
           city: data.city,
           reference: data.reference,
